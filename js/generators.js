@@ -56,7 +56,31 @@ export function normalizeAnswer(s) {
   return t;
 }
 
-// Compare a typed answer against a set of accepted strings (and numerically).
+// Draw a question that hasn't been seen yet in the current exercise.
+// `make()` returns a fresh candidate each call; `used` is a Set of question
+// texts already shown, `lastKey` is the previous question's text (to avoid an
+// immediate back-to-back repeat). When the pool is exhausted (e.g. a Basic
+// level with only a handful of distinct questions) we start a new cycle so
+// every distinct question appears before any repeats.
+export function pickDistinct(make, used, lastKey, maxTries = 300) {
+  const round = (avoidUsed) => {
+    let fb = null;
+    for (let i = 0; i < maxTries; i++) {
+      const cand = make();
+      fb = cand;
+      if (cand.text !== lastKey && (!avoidUsed || !used.has(cand.text))) return { chosen: cand, fb };
+    }
+    return { chosen: null, fb };
+  };
+  let { chosen, fb } = round(true);
+  if (!chosen) {
+    used.clear(); // pool exhausted — begin a fresh cycle (still avoid an immediate repeat)
+    ({ chosen, fb } = round(false));
+    if (!chosen) chosen = fb; // only reachable if the pool has a single question
+  }
+  used.add(chosen.text);
+  return chosen;
+}
 // The numeric fallback only triggers when the WHOLE normalised input is a clean
 // number, so loose input like "12x" can never be misread as 12.
 export function checkTyped(input, accept = [], answer = null) {

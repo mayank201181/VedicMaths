@@ -3,7 +3,7 @@
 
 import { APP, TECHNIQUES, TECHNIQUE_INDEX, BANDS, TIERS, DIFFICULTIES } from './content.js';
 import { generate } from './vedic.js';
-import { commafy, checkTyped } from './generators.js';
+import { commafy, checkTyped, pickDistinct } from './generators.js';
 import { newPlayer, ensureShape, bandStartDifficulty } from './state.js';
 import { loadPlayer, savePlayer } from './api.js';
 import { loadLocal, lastPlayerName, listLocalPlayers } from './storage.js';
@@ -309,12 +309,21 @@ function startQuiz(techId, difficulty) {
     streak: 0,
     crownAwarded: false,
     q: null,
+    used: new Set(), // question texts already shown this exercise
+    lastKey: null,
   };
   nextQuestion();
 }
 
 function nextQuestion() {
-  session.q = generate(session.techId, { difficulty: session.difficulty, level: session.level });
+  // No repeats within the same exercise (cycles through all distinct questions
+  // before repeating, and never the same one twice in a row).
+  session.q = pickDistinct(
+    () => generate(session.techId, { difficulty: session.difficulty, level: session.level }),
+    session.used,
+    session.lastKey
+  );
+  session.lastKey = session.q.text;
   renderQuestion();
 }
 
