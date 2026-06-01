@@ -308,7 +308,12 @@ function screenGuide(techId, initialTab = 'guide') {
           </div>
           <div class="diagram">${g.diagram}</div>
           <h3>How to do it</h3>
-          <ol class="steps">${g.steps.map((s) => `<li>${esc(s)}</li>`).join('')}</ol>
+          <div class="stepflow">${g.steps
+            .map(
+              (s, i) =>
+                `<div class="step"><span class="step-num">${i + 1}</span><span class="step-text">${esc(s)}</span></div>`
+            )
+            .join('')}</div>
           ${g.whyItWorks ? `<div class="why"><h3>Why it works</h3><p>${esc(g.whyItWorks)}</p></div>` : ''}
           <h3>Worked examples</h3>
           <div class="examples">${examplesHtml}</div>

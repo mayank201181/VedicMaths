@@ -359,6 +359,48 @@ button {
 .steps li {
   margin: 6px 0;
 }
+
+/* Visual step-by-step flow */
+.stepflow {
+  margin: 10px 0 4px;
+}
+.step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  position: relative;
+  padding-bottom: 16px;
+}
+.step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: 36px;
+  bottom: 0;
+  width: 3px;
+  background: #ffd6e0;
+  border-radius: 2px;
+}
+.step-num {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--pink);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+  z-index: 1;
+}
+.step-text {
+  padding-top: 5px;
+  font-size: 1.02rem;
+  line-height: 1.45;
+}
 .examples {
   display: flex;
   flex-direction: column;

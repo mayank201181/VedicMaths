@@ -78,9 +78,10 @@ export const TECHNIQUES = [
         'Some numbers are best friends — they add up to a round number like 10 or 100. ' +
         'If you know one friend, you can find the other in your head instantly.',
       steps: [
-        'To make 10: think "what is left to reach 10?" (e.g. 7 needs 3).',
-        'To make 100: take ALL the digits from 9, and the LAST digit from 10.',
-        'So 63 → 9−6 = 3 (tens), 10−3 = 7 (units) → 37. And 63 + 37 = 100!',
+        'You want to find what adds on to make 10. 🤔',
+        'Count up to 10. If you have 7, say “8, 9, 10” — that is 3 jumps. So 3 is the friend!',
+        'To make 100 there is a magic trick: take each digit away from 9, and the LAST digit away from 10.',
+        'Try 63: 9 − 6 = 3, then 10 − 3 = 7. The friend is 37. Check it: 63 + 37 = 100! 🎉',
       ],
       examples: [
         { q: '8 + ? = 10', work: '10 − 8 = 2, so the friend is 2.' },
@@ -96,13 +97,12 @@ export const TECHNIQUES = [
         'Don’t take the last digit from 9 — the units always come from 10 (for 63 it is 10−3 = 7, not 9−3).',
       tip: 'The very last digit is the only one taken from 10 — all the rest come from 9.',
       diagram: svg(
-        `<rect x="20" y="60" width="120" height="60" rx="12" fill="#fff" stroke="#ff8fab" stroke-width="3"/>
-         <text x="80" y="98" font-size="34" text-anchor="middle" font-weight="700" fill="#d6336c">7</text>
-         <text x="160" y="98" font-size="34" text-anchor="middle" font-weight="700" fill="#495057">+</text>
-         <rect x="180" y="60" width="120" height="60" rx="12" fill="#fff" stroke="#74c0fc" stroke-width="3"/>
-         <text x="240" y="98" font-size="34" text-anchor="middle" font-weight="700" fill="#1c7ed6">3</text>
-         <path d="M80 55 C 120 20, 200 20, 240 55" fill="none" stroke="#69db7c" stroke-width="4" stroke-dasharray="6 6"/>
-         <text x="160" y="40" font-size="24" text-anchor="middle" font-weight="700" fill="#2f9e44">= 10</text>`
+        `<text x="160" y="26" font-size="17" text-anchor="middle" fill="#495057">Fill the ten-frame: 7 + 3 = 10</text>
+         ${[0, 1, 2, 3, 4].map((i) => `<circle cx="${52 + i * 48}" cy="78" r="19" fill="#ff8fab"/>`).join('')}
+         ${[0, 1].map((i) => `<circle cx="${52 + i * 48}" cy="128" r="19" fill="#ff8fab"/>`).join('')}
+         ${[2, 3, 4].map((i) => `<circle cx="${52 + i * 48}" cy="128" r="19" fill="#fff" stroke="#74c0fc" stroke-width="3" stroke-dasharray="5 4"/>`).join('')}
+         <text x="100" y="170" font-size="15" text-anchor="middle" fill="#d6336c">7 filled</text>
+         <text x="220" y="170" font-size="15" text-anchor="middle" fill="#1c7ed6">3 empty</text>`
       ),
     },
   },
@@ -119,9 +119,10 @@ export const TECHNIQUES = [
         'Doubling means adding a number to itself. Halving is the opposite — splitting it into ' +
         'two equal parts. Break the number into tens and units to make it easy.',
       steps: [
-        'Double the tens, double the units, then add them together.',
-        '34 → double 30 = 60, double 4 = 8 → 60 + 8 = 68.',
-        'To halve, share the tens and units into two: half of 86 → half of 80 (40) + half of 6 (3) = 43.',
+        'Doubling means make two of it — just add the number to itself.',
+        'For bigger numbers, break it up: do the tens first, then the ones.',
+        'Double 34 → double 30 is 60, double 4 is 8. Add them: 60 + 8 = 68.',
+        'Halving is sharing into two equal piles: half of 86 → half of 80 (40) + half of 6 (3) = 43.',
       ],
       examples: [
         { q: 'Double 6', work: '6 + 6 = 12.' },
@@ -137,12 +138,12 @@ export const TECHNIQUES = [
         'When doubling, remember to carry: double 47 is 80 + 14 = 94, not “8” and “14” written side by side.',
       tip: 'Doubling twice is the same as ×4. Halving twice is the same as ÷4.',
       diagram: svg(
-        `<circle cx="70" cy="90" r="30" fill="#ffe066"/>
-         <text x="70" y="100" font-size="28" text-anchor="middle" font-weight="700" fill="#e67700">6</text>
-         <text x="135" y="100" font-size="30" text-anchor="middle" fill="#495057">→</text>
-         <circle cx="210" cy="60" r="26" fill="#ffec99"/><text x="210" y="69" font-size="22" text-anchor="middle" font-weight="700" fill="#e67700">6</text>
-         <circle cx="210" cy="120" r="26" fill="#ffec99"/><text x="210" y="129" font-size="22" text-anchor="middle" font-weight="700" fill="#e67700">6</text>
-         <text x="285" y="100" font-size="26" text-anchor="middle" font-weight="700" fill="#2f9e44">12</text>`
+        `<text x="160" y="24" font-size="16" text-anchor="middle" fill="#495057">Double 4 → two groups of 4 = 8</text>
+         ${[0, 1, 2, 3].map((i) => `<circle cx="${42 + i * 26}" cy="82" r="11" fill="#ffd43b"/>`).join('')}
+         <text x="152" y="90" font-size="26" fill="#495057">→</text>
+         ${[0, 1, 2, 3].map((i) => `<circle cx="${196 + i * 26}" cy="64" r="11" fill="#ffd43b"/>`).join('')}
+         ${[0, 1, 2, 3].map((i) => `<circle cx="${196 + i * 26}" cy="100" r="11" fill="#ffd43b"/>`).join('')}
+         <text x="160" y="150" font-size="22" text-anchor="middle" font-weight="800" fill="#2f9e44">4 + 4 = 8</text>`
       ),
     },
   },
@@ -159,9 +160,10 @@ export const TECHNIQUES = [
         'Grown-ups add from the right and carry. In your head it is easier to add the ' +
         'BIG parts first (the tens), then the small parts (the units).',
       steps: [
-        'Add the tens: 47 + 36 → 40 + 30 = 70.',
-        'Add the units: 7 + 6 = 13.',
-        'Put them together: 70 + 13 = 83.',
+        'Add the BIG parts first — the tens.',
+        '47 + 36 → 40 + 30 = 70.',
+        'Now add the small parts — the ones: 7 + 6 = 13.',
+        'Put them together: 70 + 13 = 83. Done! 🎉',
       ],
       examples: [
         { q: '23 + 5', work: '20 + (3 + 5) = 20 + 8 = 28.' },
@@ -197,9 +199,10 @@ export const TECHNIQUES = [
         'Taking away an awkward number is hard. Round it up to a tidy number, subtract that, ' +
         'then add back the little bit you took away too much.',
       steps: [
-        'To do 53 − 28, round 28 up to 30.',
-        '53 − 30 = 23.',
-        'You took away 2 too many, so add 2 back: 23 + 2 = 25.',
+        'Taking away an awkward number is hard, so round it up to a tidy one first.',
+        'For 53 − 28, round 28 up to 30.',
+        '53 − 30 = 23 — much easier!',
+        'You took away 2 too many, so give 2 back: 23 + 2 = 25.',
       ],
       examples: [
         { q: '53 − 28', work: '53 − 30 = 23, then + 2 = 25.' },
@@ -215,10 +218,15 @@ export const TECHNIQUES = [
         'You add back, you don’t subtract: rounding 28 up to 30 means you took 2 too many, so you add 2.',
       tip: 'Subtracting 9 is just − 10 + 1. Subtracting 98 is − 100 + 2.',
       diagram: svg(
-        `<text x="20" y="60" font-size="24" font-weight="700" fill="#495057">53 − 28</text>
-         <text x="120" y="60" font-size="22" fill="#7048e8">round 28 → 30</text>
-         <text x="20" y="105" font-size="24" font-weight="700" fill="#1c7ed6">53 − 30 = 23</text>
-         <text x="20" y="150" font-size="24" font-weight="800" fill="#2f9e44">23 + 2 = 25</text>`
+        `<text x="160" y="24" font-size="15" text-anchor="middle" fill="#495057">53 − 28: jump back 30, then +2</text>
+         <line x1="24" y1="108" x2="300" y2="108" stroke="#adb5bd" stroke-width="3"/>
+         <circle cx="270" cy="108" r="6" fill="#d6336c"/><text x="270" y="134" font-size="15" text-anchor="middle" fill="#d6336c">53</text>
+         <circle cx="70" cy="108" r="6" fill="#1c7ed6"/><text x="62" y="134" font-size="15" text-anchor="middle" fill="#1c7ed6">23</text>
+         <circle cx="92" cy="108" r="6" fill="#2f9e44"/>
+         <path d="M270 94 C 180 52, 110 52, 70 94" fill="none" stroke="#1c7ed6" stroke-width="3"/>
+         <text x="168" y="58" font-size="15" text-anchor="middle" fill="#1c7ed6">− 30</text>
+         <path d="M70 122 C 78 142, 88 142, 92 124" fill="none" stroke="#2f9e44" stroke-width="3"/>
+         <text x="110" y="150" font-size="18" font-weight="800" fill="#2f9e44">+2 = 25</text>`
       ),
     },
   },
@@ -235,9 +243,10 @@ export const TECHNIQUES = [
         'Multiplying by 10, 100 or 1000 is the easiest trick of all. The digits stay the same — ' +
         'they just slide to a bigger place and a zero fills the gap.',
       steps: [
-        '× 10 → add one zero: 24 × 10 = 240.',
-        '× 100 → add two zeros: 24 × 100 = 2400.',
-        '× 1000 → add three zeros: 24 × 1000 = 24000.',
+        'The digits stay the same — you just add zeros on the end.',
+        '× 10 → add ONE zero: 24 becomes 240.',
+        '× 100 → add TWO zeros: 24 becomes 2400.',
+        '× 1000 → add THREE zeros: 24 becomes 24000.',
       ],
       examples: [
         { q: '7 × 10', work: 'add one zero → 70.' },
@@ -274,9 +283,10 @@ export const TECHNIQUES = [
       intro:
         'Five is half of ten. So to multiply by 5, multiply by 10 (easy!) and then halve the result.',
       steps: [
-        '× 10 first: 18 × 10 = 180.',
-        'Halve it: half of 180 = 90.',
-        'So 18 × 5 = 90.',
+        'Five is half of ten, so use ten — it is much easier!',
+        'First do × 10: 18 × 10 = 180.',
+        'Then take half: half of 180 = 90.',
+        'So 18 × 5 = 90. ✋',
       ],
       examples: [
         { q: '6 × 5', work: '6 × 10 = 60, half = 30.' },
@@ -311,9 +321,10 @@ export const TECHNIQUES = [
         'Nine is just one less than ten. So to multiply by 9, multiply by 10 and then subtract ' +
         'one lot of the number.',
       steps: [
-        '× 10: 7 × 10 = 70.',
-        'Take one 7 away: 70 − 7 = 63.',
-        'So 7 × 9 = 63.',
+        'Nine is just one less than ten.',
+        'First do × 10: 7 × 10 = 70.',
+        'Then take one of the number away: 70 − 7 = 63.',
+        'So 7 × 9 = 63. 9️⃣',
       ],
       examples: [
         { q: '7 × 9', work: '70 − 7 = 63.' },
@@ -348,9 +359,10 @@ export const TECHNIQUES = [
         'To multiply a two-digit number by 11, split its two digits apart and write their ' +
         'sum in the gap between them.',
       steps: [
-        '35 × 11 → split: 3 _ 5.',
-        'Add the neighbours: 3 + 5 = 8 → goes in the middle.',
-        'Answer: 3 8 5 = 385.',
+        'Take your two-digit number, like 35.',
+        'Pull the two digits apart and leave a gap: 3 _ 5.',
+        'Add the two digits and pop the answer into the gap: 3 + 5 = 8 → 3 8 5.',
+        'So 35 × 11 = 385. (If the middle adds to 10 or more, carry the 1 to the left.)',
       ],
       examples: [
         { q: '4 × 11', work: 'the digit just doubles into both places → 44.' },
@@ -388,9 +400,10 @@ export const TECHNIQUES = [
         'A real Vedic sutra! To square a number ending in 5, take the part before the 5, ' +
         'multiply it by the next number up, and stick 25 on the end.',
       steps: [
-        '35² → the "before" part is 3.',
-        'Multiply by one more: 3 × 4 = 12.',
-        'Write 25 after it: 12|25 = 1225.',
+        'This works for any number that ends in 5, like 35.',
+        'Look at the part before the 5. For 35 that part is 3.',
+        'Multiply it by the NEXT number up: 3 × 4 = 12.',
+        'Write 25 on the end: 12 then 25 → 1225. The answer always ends in 25!',
       ],
       examples: [
         { q: '15²', work: '1 × 2 = 2 → 225.' },
@@ -429,10 +442,11 @@ export const TECHNIQUES = [
         'When two numbers are both close to a base like 100, find how far each is BELOW the base, ' +
         'then combine cleverly. This is the famous Nikhilam method.',
       steps: [
-        '97 × 96, base 100. Deficits: 100−97 = 3 and 100−96 = 4.',
-        'Left part: cross-subtract → 97 − 4 = 93 (same as 96 − 3).',
-        'Right part: multiply the deficits → 3 × 4 = 12.',
-        'Join them (two digits per 100): 93|12 = 9312.',
+        'Use this when both numbers are just below 100, like 97 and 96.',
+        'See how far each is below 100: 97 is 3 below, 96 is 4 below.',
+        'Left part: take one gap off the other number → 97 − 4 = 93.',
+        'Right part: multiply the two gaps → 3 × 4 = 12.',
+        'Stick them together: 93 then 12 → 9312.',
       ],
       examples: [
         { q: '8 × 7 (base 10)', work: 'deficits 2 & 3 → 8−3 = 5, 2×3 = 6 → 56.' },
@@ -473,10 +487,11 @@ export const TECHNIQUES = [
         'The master multiplication method. For two two-digit numbers you do three little steps: ' +
         'units × units, the crosswise sum, then tens × tens.',
       steps: [
-        '23 × 41. Units: 3 × 1 = 3.',
-        'Crosswise: (2×1) + (3×4) = 2 + 12 = 14 → write 4, carry 1.',
-        'Tens: 2 × 4 = 8, plus carry 1 = 9.',
-        'Read it off: 9 4 3 = 943.',
+        'Multiply 23 × 41 in three little steps — no long rows!',
+        'Ones: multiply the last digits → 3 × 1 = 3.',
+        'Crosswise: 2 × 1 + 3 × 4 = 2 + 12 = 14 → write 4, carry the 1.',
+        'Tens: 2 × 4 = 8, add the carried 1 = 9.',
+        'Read it off: 9, 4, 3 → 943.',
       ],
       examples: [
         { q: '21 × 3', work: 'units 1×3 = 3, tens 2×3 = 6 → 63.' },
@@ -517,9 +532,10 @@ export const TECHNIQUES = [
         'To square a two-digit number, move to the nearest ten, multiply the "balanced" pair, ' +
         'and add the square of how far you moved.',
       steps: [
-        '32². Nearest ten is 30, surplus = 2.',
-        'Balance it: 30 × 34 = 1020 (one down by 2, one up by 2).',
-        'Add the surplus squared: 2² = 4.',
+        'To square a 2-digit number, lean on the nearest ten.',
+        'For 32, the nearest ten is 30, and 32 is 2 above it.',
+        'Make a balanced pair: 30 × 34 (one 2 below, one 2 above) = 1020.',
+        'Add the little jump squared: 2 × 2 = 4.',
         '1020 + 4 = 1024.',
       ],
       examples: [
@@ -555,8 +571,9 @@ export const TECHNIQUES = [
         'Percent means "out of 100". The trick is to find 10% (divide by 10), because every ' +
         'other percentage is built from it.',
       steps: [
-        '10% of 80 = 80 ÷ 10 = 8.',
-        '20% = two lots of 10% = 16.   5% = half of 10% = 4.',
+        'Percent means “out of 100”. The secret is to find 10% first.',
+        '10% is just a tenth — divide by 10. So 10% of 80 = 8.',
+        'Build the rest from it: 20% is two tens (8 + 8 = 16); 5% is half a ten (4).',
         '15% = 10% + 5% = 8 + 4 = 12.',
       ],
       examples: [
