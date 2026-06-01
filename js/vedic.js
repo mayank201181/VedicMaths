@@ -78,7 +78,7 @@ const GEN = {
 
   // ----- Doubling & Halving -----------------------------------------------
   double({ difficulty, level }) {
-    const hi = [12, 60, 400][difficulty] + level * 6;
+    const hi = [20, 60, 400][difficulty] + level * 6;
     const halving = difficulty > 0 && Math.random() < 0.45;
     if (halving) {
       const n = rand(6, hi) * 2; // guaranteed even
@@ -174,7 +174,7 @@ const GEN = {
 
   // ----- The 5 trick (×10, halve) -----------------------------------------
   times5({ difficulty, level }) {
-    const n = [rand(2, 12), rand(12, 60) + level, rand(40, 180) + level * 5][difficulty];
+    const n = [rand(2, 20), rand(12, 60) + level, rand(40, 180) + level * 5][difficulty];
     const answer = n * 5;
     return make({
       difficulty,
@@ -188,7 +188,7 @@ const GEN = {
 
   // ----- The 9 trick (×10, subtract one lot) ------------------------------
   times9({ difficulty, level }) {
-    const n = [rand(2, 12), rand(12, 40) + level, rand(20, 130) + level * 4][difficulty];
+    const n = [rand(2, 20), rand(12, 40) + level, rand(20, 130) + level * 4][difficulty];
     const answer = n * 9;
     return make({
       difficulty,
@@ -203,7 +203,7 @@ const GEN = {
   // ----- The 11 trick (add the neighbours) --------------------------------
   times11({ difficulty, level }) {
     if (difficulty === 0) {
-      const n = rand(2, 9);
+      const n = rand(2, 19);
       return make({
         difficulty,
         text: `${n} × 11`,
@@ -239,7 +239,7 @@ const GEN = {
 
   // ----- Squares ending in 5 (Ekādhikena) ---------------------------------
   square5({ difficulty, level }) {
-    const front = [rand(1, 4), rand(1, 9), rand(10, 19)][difficulty];
+    const front = [rand(1, 9), rand(1, 9), rand(10, 19)][difficulty];
     const n = front * 10 + 5;
     const answer = n * n;
     return make({
@@ -255,7 +255,7 @@ const GEN = {
   // ----- Near a Base (Nikhilam) -------------------------------------------
   nikhilam({ difficulty, level }) {
     const baseVal = difficulty <= 1 ? (difficulty === 0 ? 10 : 100) : level > 0 ? 1000 : 100;
-    const lo = baseVal === 10 ? 6 : baseVal === 100 ? 86 : 988;
+    const lo = baseVal === 10 ? 5 : baseVal === 100 ? 86 : 988;
     const a = rand(lo, baseVal - 1);
     const b = rand(lo, baseVal - 1);
     const da = baseVal - a;
@@ -322,7 +322,7 @@ const GEN = {
 
   // ----- Square any 2-digit (friendly base) -------------------------------
   squareany({ difficulty, level }) {
-    const n = [rand(11, 19), rand(21, 79), rand(21, 99)][difficulty] + (difficulty === 2 ? 0 : 0);
+    const n = [rand(11, 29), rand(21, 79), rand(21, 99)][difficulty];
     const baseTen = Math.round(n / 10) * 10;
     const s = n - baseTen; // surplus (can be negative)
     const answer = n * n;
@@ -342,7 +342,7 @@ const GEN = {
   // ----- Easy percentages --------------------------------------------------
   percent({ difficulty, level }) {
     if (difficulty === 0) {
-      const base = rand(2, 9) * 10 + level * 10;
+      const base = rand(2, 19) * 10 + level * 10;
       return make({
         difficulty,
         text: `10% of ${base}`,
@@ -413,8 +413,8 @@ const GEN = {
 
   // ----- Difference of squares: (a−b)(a+b) = a²−b² ------------------------
   diffsquares({ difficulty, level }) {
-    const mid = [rand(2, 5) * 10, rand(2, 9) * 10, rand(3, 20) * 10 + level * 10][difficulty];
-    const d = [rand(1, 4), rand(1, 9), rand(2, 12)][difficulty];
+    const mid = [rand(2, 8) * 10, rand(2, 9) * 10, rand(3, 20) * 10 + level * 10][difficulty];
+    const d = [rand(1, 5), rand(1, 9), rand(2, 12)][difficulty];
     const a = mid - d;
     const b = mid + d;
     return make({
@@ -429,7 +429,7 @@ const GEN = {
 
   // ----- Cubes ------------------------------------------------------------
   cubes({ difficulty, level }) {
-    const n = [rand(2, 12), rand(2, 20) + level, rand(11, 30) + level][difficulty];
+    const n = [rand(2, 15), rand(2, 20) + level, rand(11, 30) + level][difficulty];
     return make({
       difficulty,
       text: `${n}³`,
@@ -442,7 +442,7 @@ const GEN = {
 
   // ----- Square roots of perfect squares ----------------------------------
   sqrt({ difficulty, level }) {
-    const k = [rand(2, 12), rand(10, 30) + level, rand(20, 60) + level][difficulty];
+    const k = [rand(2, 20), rand(10, 30) + level, rand(20, 60) + level][difficulty];
     const n = k * k;
     return make({
       difficulty,
@@ -492,7 +492,7 @@ const GEN = {
 
   // ----- Cube roots of perfect cubes --------------------------------------
   cuberoot({ difficulty, level }) {
-    const k = [rand(2, 9), rand(11, 30), rand(31, 70) + level][difficulty];
+    const k = [rand(2, 12), rand(11, 30), rand(31, 70) + level][difficulty];
     const n = k * k * k;
     const lastMap = { 0: 0, 1: 1, 8: 2, 7: 3, 4: 4, 5: 5, 6: 6, 3: 7, 2: 8, 9: 9 };
     const lastDigit = n % 10;

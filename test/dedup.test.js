@@ -63,5 +63,17 @@ for (const N of [2, 5, 9, 40]) {
   // the first full cycle (9) must be 9 distinct questions before any repeat
   assert.strictEqual(new Set(seq.slice(0, 9)).size, 9, 'first cycle of Friends-of-10 not fully distinct');
 }
+// --- 4) Every Basic (multiple-choice) level offers decent variety -----------
+// Guards against a generator silently having too few distinct questions.
+import { TECHNIQUE_IDS } from '../js/vedic.js';
+const MIN_BASIC_POOL = 8;
+for (const id of TECHNIQUE_IDS) {
+  const seen = new Set();
+  for (let i = 0; i < 600; i++) seen.add(genQuestion(id, { difficulty: 0, level: 0 }).text);
+  assert.ok(
+    seen.size >= MIN_BASIC_POOL,
+    `Basic pool for "${id}" too small: only ${seen.size} distinct questions (need >= ${MIN_BASIC_POOL})`
+  );
+}
 
 console.log('✅ Dedup tests passed: no in-exercise repeats until the pool is exhausted.');
