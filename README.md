@@ -117,9 +117,12 @@ curl -s  https://<your-app>.vercel.app/api/content | head -c 80
 By default each device keeps its own progress in `localStorage` (and the server falls back
 to a JSON file locally). To sync progress across devices:
 
-1. Vercel project → **Storage** → **Create Database** → **KV** → connect to the project.
-2. This sets `KV_REST_API_URL` and `KV_REST_API_TOKEN`. **Redeploy.**
-3. `server/store.js` detects those vars automatically and switches from the JSON file to KV.
+1. Vercel project → **Storage** → **Create Database** → choose a Redis store
+   (**Upstash for Redis** / **KV**) → connect to the project.
+2. This injects either `KV_REST_API_URL` + `KV_REST_API_TOKEN` or
+   `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`. **Redeploy.**
+3. `server/store.js` detects either pair automatically and switches from the JSON
+   file to Redis. Confirm with `/api/content` → it should report `"backend":"kv"`.
 
 ---
 

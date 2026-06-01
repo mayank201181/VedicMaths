@@ -9,8 +9,10 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
-const KV_URL = process.env.KV_REST_API_URL;
-const KV_TOKEN = process.env.KV_REST_API_TOKEN;
+// Accept either the legacy Vercel KV names or the Upstash-for-Redis marketplace
+// names — whichever the connected database injects.
+const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 const useKV = Boolean(KV_URL && KV_TOKEN);
 
 const KEY = (name) => 'magicmaths:player:' + String(name).trim().toLowerCase();
