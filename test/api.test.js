@@ -11,7 +11,9 @@ import os from 'node:os';
 const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'mm-'));
 process.chdir(tmp);
 
-const { handleContent, handleQuestion } = await import('../server/core.js');
+const { handleContent, handleQuestion, handleOwner, handlePlayerPost, handlePlayerGet } = await import(
+  '../server/core.js'
+);
 const contentFn = (await import('../api/content.js')).default;
 const questionFn = (await import('../api/question.js')).default;
 const playerFn = (await import('../api/player.js')).default;
@@ -81,6 +83,30 @@ assert.ok(saved.techniques.friends10, 'ensureShape backfilled techniques');
 res = mockRes();
 await playerFn({ method: 'GET', url: '/api/player?name=Tester' }, res);
 assert.equal(JSON.parse(res.body).player.band, '9-10', 'persisted band');
+
+// --- owner endpoint ---
+delete process.env.OWNER_KEY;
+assert.equal((await handleOwner({ action: 'list' })).status, 503, 'owner refuses when no OWNER_KEY');
+
+process.env.OWNER_KEY = 'secret123';
+assert.equal((await handleOwner({ key: 'nope', action: 'list' })).status, 401, 'wrong passcode rejected');
+assert.equal((await handleOwner({ action: 'list' })).status, 401, 'missing passcode rejected');
+
+let owner = await handleOwner({ key: 'secret123', action: 'list' });
+assert.equal(owner.status, 200, 'correct passcode lists');
+assert.ok(owner.json.players.find((p) => p.name === 'Tester'), 'owner sees the player');
+
+// disable, and confirm it sticks even when the client saves again
+owner = await handleOwner({ key: 'secret123', action: 'setDisabled', name: 'Tester', disabled: true });
+assert.equal(owner.status, 200);
+assert.equal((await handlePlayerGet('Tester')).json.player.disabled, true, 'player disabled');
+await handlePlayerPost('Tester', { name: 'Tester', band: '7-8' }); // client save without disabled
+assert.equal((await handlePlayerGet('Tester')).json.player.disabled, true, 'disable survives client save');
+
+// re-enable
+await handleOwner({ key: 'secret123', action: 'setDisabled', name: 'Tester', disabled: false });
+assert.equal((await handlePlayerGet('Tester')).json.player.disabled, false, 're-enabled');
+delete process.env.OWNER_KEY;
 
 // helper: turn a string body into req.on('data'/'end') emitter
 function makeBodyEmitter(str) {

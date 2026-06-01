@@ -31,6 +31,7 @@ export function ensureShape(player) {
   if (!player.settings.region) player.settings.region = DEFAULT_REGION;
   if (typeof player.settings.sound !== 'boolean') player.settings.sound = true;
   if (typeof player.settings.voice !== 'boolean') player.settings.voice = true;
+  if (typeof player.disabled !== 'boolean') player.disabled = false;
   player.techniques = player.techniques || {};
   for (const t of TECHNIQUES) {
     const cur = player.techniques[t.id] || {};

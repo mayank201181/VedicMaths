@@ -59,3 +59,19 @@ export async function getContent() {
     return null;
   }
 }
+
+// Owner dashboard call. Returns { status, data } so the UI can tell apart
+// 200 (ok), 401 (wrong passcode) and 503 (OWNER_KEY not configured).
+export async function ownerRequest(body) {
+  try {
+    const res = await fetch('/api/owner', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    return { status: res.status, data };
+  } catch (_) {
+    return { status: 0, data: { error: 'offline' } };
+  }
+}

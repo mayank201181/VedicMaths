@@ -123,6 +123,28 @@ to a JSON file locally). To sync progress across devices:
 
 ---
 
+## Owner dashboard
+
+A hidden, passcode-protected admin view for the app owner to see who's using it
+and pause profiles if needed.
+
+- **Reach it at** `https://<your-app>/#owner`.
+- **Set a passcode:** Vercel project → **Settings → Environment Variables** → add
+  `OWNER_KEY` = *your secret* → **Redeploy**. Without `OWNER_KEY` the endpoint
+  refuses all access (returns 503).
+- **Needs Vercel KV** (above) to see everyone across devices — otherwise it only
+  shows profiles on the current server instance.
+
+It lists every first name with their age band, when they joined, last active,
+questions answered and crowns, and an **Enable / Disable** toggle. Disabling a
+name shows that child a friendly "paused" screen; the flag is owner-controlled
+and can't be cleared by the child's own progress saves.
+
+> Note: names are self-entered (there are no accounts), so disabling is effective
+> parental/admin control rather than hard security.
+
+---
+
 ## Customising
 
 - **Add a technique:** add an entry to `TECHNIQUES` in `js/content.js` (guide + diagram)

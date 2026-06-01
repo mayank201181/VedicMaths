@@ -8,6 +8,7 @@ import {
   handleQuestion,
   handlePlayerGet,
   handlePlayerPost,
+  handleOwner,
 } from './server/core.js';
 
 const PORT = process.env.PORT || 3000;
@@ -66,6 +67,10 @@ const server = http.createServer(async (req, res) => {
   try {
     if (p === '/api/content') return sendJSON(res, handleContent());
     if (p === '/api/question') return sendJSON(res, handleQuestion(query));
+    if (p === '/api/owner') {
+      if (req.method !== 'POST') return sendJSON(res, { status: 405, json: { error: 'method-not-allowed' } });
+      return sendJSON(res, await handleOwner(await readBody(req)));
+    }
     if (p.startsWith('/api/player/')) {
       const name = decodeURIComponent(p.slice('/api/player/'.length));
       if (req.method === 'POST') return sendJSON(res, await handlePlayerPost(name, await readBody(req)));
