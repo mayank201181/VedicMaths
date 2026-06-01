@@ -167,7 +167,7 @@ button {
 }
 .band-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
 .band-grid.small {
@@ -232,8 +232,43 @@ button {
   font-weight: 600;
   margin: 6px 0 14px;
 }
-.tech-grid {
+/* Tier sections */
+.tier-section {
+  margin: 14px 0;
+}
+.tier-head {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: var(--shadow);
+  text-align: left;
+}
+.tier-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.tier-blurb {
+  color: var(--muted);
+  font-size: 0.82rem;
+  flex: 1;
+}
+.tier-chevron {
+  font-size: 1.1rem;
+  color: var(--pink-d);
+}
+.tier-section .tech-grid {
+  display: none;
+  margin-top: 12px;
+}
+.tier-section.open .tech-grid {
   display: grid;
+}
+
+.tech-grid {
   grid-template-columns: repeat(2, 1fr);
   gap: 14px;
 }
