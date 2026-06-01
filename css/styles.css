@@ -454,6 +454,33 @@ button {
   align-items: center;
   justify-content: center;
 }
+.watch-txt {
+  line-height: 1.5;
+}
+.tok {
+  display: inline-block;
+  opacity: 0;
+  margin-right: 5px;
+  animation: tokpop 0.3s ease forwards;
+}
+.tok-num {
+  color: #7048e8;
+  font-weight: 800;
+}
+@keyframes tokpop {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(5px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 @keyframes slidein {
   from {
     opacity: 0;

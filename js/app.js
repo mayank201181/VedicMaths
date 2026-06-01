@@ -82,6 +82,26 @@ function speakToggle(btn, text) {
   }
 }
 
+// Count a number up from 0 → target (odometer style) after a short delay.
+function countUp(span, target, delaySec, suffix = '') {
+  const run = () => {
+    if (typeof requestAnimationFrame !== 'function') {
+      span.textContent = target + suffix;
+      return;
+    }
+    const dur = 650;
+    const t0 = performance.now();
+    const frame = (now) => {
+      const p = Math.min(1, (now - t0) / dur);
+      span.textContent = Math.round(target * p) + suffix;
+      if (p < 1) requestAnimationFrame(frame);
+      else span.textContent = target + suffix;
+    };
+    requestAnimationFrame(frame);
+  };
+  setTimeout(run, delaySec * 1000 + 120);
+}
+
 function confetti() {
   const colors = ['#ff8fab', '#ffd43b', '#69db7c', '#74c0fc', '#b197fc', '#ffa94d'];
   for (let i = 0; i < 36; i++) {
@@ -418,12 +438,36 @@ function screenGuide(techId, initialTab = 'guide') {
     const stage = node.querySelector('.watch-stage');
     const wbtn = node.querySelector('.watch-btn');
     let widx = 0;
+    const isNum = (tok) => /\d/.test(tok);
     const revealNext = () => {
-      const line = el(
-        `<div class="watch-line"><span class="watch-n">${widx + 1}</span><span>${esc(watchData.steps[widx])}</span></div>`
-      );
+      const step = watchData.steps[widx];
+      const isLast = widx === watchData.steps.length - 1;
+      // Build the step token by token so numbers visibly "form".
+      const line = el(`<div class="watch-line"><span class="watch-n">${widx + 1}</span><span class="watch-txt"></span></div>`);
+      const txt = line.querySelector('.watch-txt');
+      const parts = step.split(' ');
+      parts.forEach((p, i) => {
+        const span = el(`<span class="tok${isNum(p) ? ' tok-num' : ''}">${esc(p)}</span>`);
+        span.style.animationDelay = i * 0.1 + 's';
+        txt.appendChild(span);
+      });
       stage.appendChild(line);
-      speak(watchData.steps[widx]);
+      speak(step);
+
+      // On the final step, count the last number up like an odometer.
+      if (isLast) {
+        const nums = [...txt.querySelectorAll('.tok-num')];
+        const lastNum = nums[nums.length - 1];
+        if (lastNum) {
+          const target = parseInt(lastNum.textContent.replace(/[^\d]/g, ''), 10);
+          const suffix = lastNum.textContent.replace(/[\d,]/g, '');
+          if (Number.isFinite(target) && target > 0 && target <= 100000) {
+            lastNum.textContent = '0' + suffix;
+            countUp(lastNum, target, parts.length * 0.1, suffix);
+          }
+        }
+      }
+
       widx++;
       if (widx >= watchData.steps.length) {
         wbtn.textContent = '↺ Replay';
