@@ -53,6 +53,35 @@ function speak(text) {
   }
 }
 
+// Read-aloud button: first tap starts, second tap STOPS (proper toggle).
+function speakToggle(btn, text) {
+  try {
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+    if (synth.speaking || synth.pending) {
+      synth.cancel();
+      btn.textContent = '🔊';
+      btn.classList.remove('speaking');
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-GB';
+    u.rate = 0.95;
+    u.pitch = 1.05;
+    const reset = () => {
+      btn.textContent = '🔊';
+      btn.classList.remove('speaking');
+    };
+    u.onend = reset;
+    u.onerror = reset;
+    btn.textContent = '⏹️';
+    btn.classList.add('speaking');
+    synth.speak(u);
+  } catch (_) {
+    btn.textContent = '🔊';
+  }
+}
+
 function confetti() {
   const colors = ['#ff8fab', '#ffd43b', '#69db7c', '#74c0fc', '#b197fc', '#ffa94d'];
   for (let i = 0; i < 36; i++) {
@@ -79,6 +108,11 @@ function clear() {
   root.innerHTML = '';
 }
 function show(node) {
+  try {
+    window.speechSynthesis && window.speechSynthesis.cancel(); // stop any read-aloud when changing screens
+  } catch (_) {
+    /* ignore */
+  }
   clear();
   root.appendChild(node);
   window.scrollTo(0, 0);
@@ -238,9 +272,18 @@ function screenDashboard() {
 // ---------------------------------------------------------------------------
 // GUIDE — mini course for one technique
 // ---------------------------------------------------------------------------
-function screenGuide(techId) {
+function screenGuide(techId, initialTab = 'guide') {
   const t = TECHNIQUE_INDEX[techId];
   const g = t.guide;
+  const recommended = bandStartDifficulty(player);
+
+  const examplesHtml = g.examples
+    .map(
+      (e, i) =>
+        `<div class="example"><span class="ex-num">${i + 1}</span><span class="ex-q">${esc(e.q)}</span><span class="ex-w">${esc(e.work)}</span></div>`
+    )
+    .join('');
+
   const node = el(`
     <div class="screen guide" style="--card:${t.color}">
       <button class="back-btn">← Back</button>
@@ -251,43 +294,83 @@ function screenGuide(techId) {
           <p class="sutra">${esc(t.sutra)}</p>
         </div>
       </div>
-      <div class="card">
-        <div class="readaloud-row">
-          <p class="intro">${esc(g.intro)}</p>
-          <button class="speak-btn" title="Read aloud">🔊</button>
-        </div>
-        <div class="diagram">${g.diagram}</div>
-        <h3>How to do it</h3>
-        <ol class="steps">${g.steps.map((s) => `<li>${esc(s)}</li>`).join('')}</ol>
-        <h3>Worked examples</h3>
-        <div class="examples">
-          ${g.examples
-            .map((e) => `<div class="example"><span class="ex-q">${esc(e.q)}</span><span class="ex-w">${esc(e.work)}</span></div>`)
-            .join('')}
-        </div>
-        <p class="tip">💡 ${esc(g.tip)}</p>
+
+      <div class="tabbar">
+        <button class="tab-btn" data-tab="guide">📖 Guide</button>
+        <button class="tab-btn" data-tab="practice">✏️ Practice</button>
       </div>
-      <h3 class="centre">Practise it!</h3>
-      <div class="diff-grid">
-        ${DIFFICULTIES.map(
-          (d) => `<button class="diff-btn" data-diff="${d.id}">${d.emoji}<span>${d.label}</span><small>${d.note}</small></button>`
-        ).join('')}
+
+      <div class="tab-panel" data-panel="guide">
+        <div class="card">
+          <div class="readaloud-row">
+            <p class="intro">${esc(g.intro)}</p>
+            <button class="speak-btn" title="Read aloud / stop">🔊</button>
+          </div>
+          <div class="diagram">${g.diagram}</div>
+          <h3>How to do it</h3>
+          <ol class="steps">${g.steps.map((s) => `<li>${esc(s)}</li>`).join('')}</ol>
+          ${g.whyItWorks ? `<div class="why"><h3>Why it works</h3><p>${esc(g.whyItWorks)}</p></div>` : ''}
+          <h3>Worked examples</h3>
+          <div class="examples">${examplesHtml}</div>
+          ${g.mistakes ? `<div class="watchout"><b>⚠️ Watch out:</b> ${esc(g.mistakes)}</div>` : ''}
+          <p class="tip">💡 ${esc(g.tip)}</p>
+        </div>
+        <button class="primary-btn big go-practice">I'm ready — let's practise! ✏️</button>
+      </div>
+
+      <div class="tab-panel" data-panel="practice" hidden>
+        <div class="card">
+          <h3 class="centre">Choose your level</h3>
+          <div class="diff-grid">
+            ${DIFFICULTIES.map(
+              (d) => `<button class="diff-btn" data-diff="${d.id}">${d.emoji}<span>${d.label}</span><small>${d.note}</small></button>`
+            ).join('')}
+          </div>
+          <p class="muted centre practice-hint">25 questions to start — then add more or step up a level.</p>
+        </div>
       </div>
     </div>
   `);
 
   node.querySelector('.back-btn').addEventListener('click', screenDashboard);
-  const readText = `${t.name}. ${g.intro} ${g.steps.join(' ')} ${g.tip}`;
-  node.querySelector('.speak-btn').addEventListener('click', () => speak(readText));
 
-  // Highlight the difficulty recommended for this child's age band.
-  const recommended = bandStartDifficulty(player);
+  // Tabs
+  const panels = node.querySelectorAll('.tab-panel');
+  const tabBtns = node.querySelectorAll('.tab-btn');
+  const setTab = (name) => {
+    tabBtns.forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
+    panels.forEach((p) => (p.hidden = p.dataset.panel !== name));
+    try {
+      window.speechSynthesis && window.speechSynthesis.cancel();
+    } catch (_) {
+      /* ignore */
+    }
+    window.scrollTo(0, 0);
+  };
+  tabBtns.forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
+  node.querySelector('.go-practice').addEventListener('click', () => setTab('practice'));
+
+  // Read aloud (toggle): reads the whole guide, including examples.
+  const readText = [
+    t.name,
+    g.intro,
+    g.steps.join(' '),
+    g.whyItWorks || '',
+    'Here are some examples.',
+    g.examples.map((e) => `${e.q}. ${e.work}`).join(' '),
+    g.mistakes ? 'Watch out. ' + g.mistakes : '',
+    g.tip,
+  ].join(' ');
+  const speakBtn = node.querySelector('.speak-btn');
+  speakBtn.addEventListener('click', () => speakToggle(speakBtn, readText));
+
   node.querySelectorAll('.diff-btn').forEach((btn) => {
     const d = Number(btn.dataset.diff);
     if (d === recommended) btn.classList.add('recommended');
     btn.addEventListener('click', () => startQuiz(techId, d));
   });
 
+  setTab(initialTab);
   show(node);
 }
 

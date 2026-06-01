@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "test": "node test/sweep.js && node test/dedup.test.js && node test/api.test.js && node test/store.test.js",
+    "test": "node test/sweep.js && node test/dedup.test.js && node test/content.test.js && node test/api.test.js && node test/store.test.js",
     "audit": "node test/audit.js"
   },
   "engines": {

@@ -34,7 +34,21 @@ global.document = window.document;
 global.localStorage = window.localStorage;
 global.fetch = () => Promise.reject(new Error('offline')); // force local fallback
 window.scrollTo = () => {};
-window.speechSynthesis = { cancel() {}, speak() {} };
+let _speaking = false;
+window.speechSynthesis = {
+  get speaking() {
+    return _speaking;
+  },
+  get pending() {
+    return false;
+  },
+  speak() {
+    _speaking = true;
+  },
+  cancel() {
+    _speaking = false;
+  },
+};
 global.SpeechSynthesisUtterance = class {};
 window.AudioContext = class {
   createOscillator() {
@@ -80,10 +94,24 @@ assert.ok(collapsed.classList.contains('open'), 'tapping a tier header expands i
 $$('.tech-card')[0].click();
 await tick();
 
-// 3) Guide
+// 3) Guide (now tabbed: Guide / Practice)
 assert.ok($('.diagram svg'), 'guide has an SVG diagram');
-assert.ok($$('.diff-btn').length === 3, 'three difficulty buttons');
-$('.diff-btn[data-diff="0"]').click(); // Basic = multiple choice
+assert.ok($$('.tab-btn').length === 2, 'guide has Guide/Practice tabs');
+assert.ok($$('.example').length >= 5, 'guide shows several worked examples');
+assert.ok($('.why') && $('.watchout'), 'guide has why-it-works and watch-out sections');
+
+// Read-aloud button is a real toggle: tap = start, tap again = stop.
+const speakBtn = $('.speak-btn');
+speakBtn.click();
+assert.equal(speakBtn.textContent, '⏹️', 'first tap starts read-aloud');
+speakBtn.click();
+assert.equal(speakBtn.textContent, '🔊', 'second tap stops read-aloud');
+
+// Switch to the Practice tab, then start Basic (multiple choice).
+$('.tab-btn[data-tab="practice"]').click();
+await tick();
+assert.ok($$('.diff-btn').length === 3, 'three difficulty buttons in Practice');
+$('.diff-btn[data-diff="0"]').click();
 await tick();
 
 // 4) Quiz (Basic / MC) — answer several correctly to earn a crown
