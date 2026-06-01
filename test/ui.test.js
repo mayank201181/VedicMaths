@@ -97,8 +97,23 @@ await tick();
 // 3) Guide (now tabbed: Guide / Practice)
 assert.ok($('.diagram svg'), 'guide has an SVG diagram');
 assert.ok($$('.tab-btn').length === 2, 'guide has Guide/Practice tabs');
-assert.ok($$('.walk').length >= 3, 'guide shows three detailed worked examples');
+assert.ok($('.hook'), 'guide opens with a real-life hook');
+assert.ok($('.watchit') && $('.watch-btn'), 'guide has an interactive "Watch it work"');
+assert.ok($$('.walk').length >= 2, 'guide shows written worked examples too');
 assert.ok($('.why') && $('.watchout'), 'guide has why-it-works and watch-out sections');
+
+// "Watch it work" reveals one step at a time.
+const wbtn = $('.watch-btn');
+wbtn.click();
+assert.equal($$('.watch-line').length, 1, 'first tap reveals step 1');
+wbtn.click();
+assert.equal($$('.watch-line').length, 2, 'next tap reveals step 2');
+
+// Guided hint shows before the answer.
+const hintBtn = $$('.try-hint')[0];
+assert.ok($$('.try-hintbox')[0].hidden, 'hint hidden initially');
+hintBtn.click();
+assert.ok(!$$('.try-hintbox')[0].hidden, 'tapping 💡 shows a hint');
 
 // "Try these yourself" self-check set with reveal toggle.
 assert.ok($$('.tryitem').length >= 3, 'guide has a Try-these-yourself set');
@@ -110,6 +125,7 @@ tryBtn.click();
 assert.ok($$('.try-ans')[0].hidden, 'tapping again hides it');
 
 // Read-aloud button is a real toggle: tap = start, tap again = stop.
+window.speechSynthesis.cancel(); // clear any narration left from "Watch it work"
 const speakBtn = $('.speak-btn');
 speakBtn.click();
 assert.equal(speakBtn.textContent, '⏹️', 'first tap starts read-aloud');

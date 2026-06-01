@@ -353,6 +353,172 @@ button {
   height: auto;
   display: block;
 }
+
+/* Animated diagrams: the parts draw themselves in, in sequence */
+.diagram svg text,
+.diagram svg line,
+.diagram svg path {
+  opacity: 0;
+  animation: dfade 0.5s ease forwards;
+}
+.diagram svg circle,
+.diagram svg rect {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dpop 0.45s ease forwards;
+}
+@keyframes dfade {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes dpop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.diagram svg > *:nth-child(1) { animation-delay: 0.02s; }
+.diagram svg > *:nth-child(2) { animation-delay: 0.09s; }
+.diagram svg > *:nth-child(3) { animation-delay: 0.16s; }
+.diagram svg > *:nth-child(4) { animation-delay: 0.23s; }
+.diagram svg > *:nth-child(5) { animation-delay: 0.3s; }
+.diagram svg > *:nth-child(6) { animation-delay: 0.37s; }
+.diagram svg > *:nth-child(7) { animation-delay: 0.44s; }
+.diagram svg > *:nth-child(8) { animation-delay: 0.51s; }
+.diagram svg > *:nth-child(9) { animation-delay: 0.58s; }
+.diagram svg > *:nth-child(10) { animation-delay: 0.65s; }
+.diagram svg > *:nth-child(11) { animation-delay: 0.72s; }
+.diagram svg > *:nth-child(12) { animation-delay: 0.79s; }
+.diagram svg > *:nth-child(n + 13) { animation-delay: 0.86s; }
+
+/* Real-life hook */
+.hook {
+  background: #fff3bf;
+  border-radius: 14px;
+  padding: 11px 14px;
+  margin-bottom: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Watch it work */
+.watchit {
+  background: linear-gradient(180deg, #f3f0ff, #fff);
+  border: 2px solid #d0bfff;
+  border-radius: 16px;
+  padding: 14px;
+  margin: 16px 0;
+}
+.watchit h3 {
+  margin-top: 0;
+  color: #7048e8;
+}
+.watch-q {
+  font-size: 1.7rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 10px;
+}
+.watch-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.watch-line {
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 1.05rem;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  box-shadow: var(--shadow);
+  animation: slidein 0.35s ease;
+}
+.watch-n {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #7048e8;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@keyframes slidein {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.watch-done {
+  text-align: center;
+  font-weight: 800;
+  color: var(--green-d);
+  padding: 8px;
+  animation: slidein 0.35s ease;
+}
+.watch-btn {
+  margin-top: 12px;
+  width: 100%;
+  background: #845ef7;
+  color: #fff;
+  border-radius: 999px;
+  padding: 13px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  box-shadow: 0 4px 0 #5f3dc4;
+}
+.watch-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #5f3dc4;
+}
+
+/* Guided hint in Try-these */
+.try-btns {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+.try-hint {
+  background: #fff9db;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  box-shadow: var(--shadow);
+}
+.try-hintbox {
+  margin-top: 8px;
+  background: #fff9db;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.92rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diagram svg * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .watch-line,
+  .watch-done {
+    animation: none !important;
+  }
+}
 .steps {
   padding-left: 1.2em;
 }
@@ -529,7 +695,7 @@ button {
 }
 
 /* Try these yourself */
-.tryout .try-hint {
+.tryout .try-sub {
   margin-top: 0;
 }
 .tryitem {

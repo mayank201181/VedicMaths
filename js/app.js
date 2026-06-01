@@ -277,18 +277,22 @@ function screenGuide(techId, initialTab = 'guide') {
   const g = t.guide;
   const recommended = bandStartDifficulty(player);
 
+  // The first walkthrough powers the interactive "Watch it work"; the rest are
+  // shown as written reference examples.
+  const watchData = (g.walkthroughs || [])[0] || null;
   const walkHtml = (g.walkthroughs || [])
+    .slice(1)
     .map(
       (w, i) =>
         `<div class="walk">
-          <div class="walk-q"><span class="walk-badge">Example ${i + 1}</span> ${esc(w.q)}</div>
+          <div class="walk-q"><span class="walk-badge">Example ${i + 2}</span> ${esc(w.q)}</div>
           <div class="walk-steps">${w.steps.map((s) => `<div class="walk-step">${esc(s)}</div>`).join('')}</div>
         </div>`
     )
     .join('');
 
-  // "Try these yourself" — a few self-check problems generated at the child's
-  // level (same generators as Practice, so the answers are always correct).
+  // "Try these yourself" — self-check problems generated at the child's level
+  // (same generators as Practice, so answers are always correct), with a hint.
   const showAns = (a) => (typeof a === 'number' ? commafy(a) : esc(String(a)));
   const tryUsed = new Set();
   let tryLast = null;
@@ -296,7 +300,10 @@ function screenGuide(techId, initialTab = 'guide') {
     const q = pickDistinct(() => generate(techId, { difficulty: recommended, level: 0 }), tryUsed, tryLast);
     tryLast = q.text;
     return `<div class="tryitem">
-        <div class="try-row"><span class="try-q">${esc(q.text)}</span><button class="try-reveal">Check</button></div>
+        <div class="try-row"><span class="try-q">${esc(q.text)}</span>
+          <span class="try-btns"><button class="try-hint" title="Hint">💡</button><button class="try-reveal">Check</button></span>
+        </div>
+        <div class="try-hintbox" hidden>💡 ${esc(q.hint)}</div>
         <div class="try-ans" hidden><span class="try-big">= ${showAns(q.answer)}</span><span class="try-exp">${esc(q.explanation)}</span></div>
       </div>`;
   }).join('');
@@ -319,11 +326,22 @@ function screenGuide(techId, initialTab = 'guide') {
 
       <div class="tab-panel" data-panel="guide">
         <div class="card">
+          ${g.hook ? `<div class="hook">${esc(g.hook)}</div>` : ''}
           <div class="readaloud-row">
             <p class="intro">${esc(g.intro)}</p>
             <button class="speak-btn" title="Read aloud / stop">🔊</button>
           </div>
           <div class="diagram">${g.diagram}</div>
+          ${
+            watchData
+              ? `<div class="watchit">
+                   <h3>👀 Watch it work</h3>
+                   <div class="watch-q">${esc(watchData.q)}</div>
+                   <div class="watch-stage"></div>
+                   <button class="watch-btn">▶ Start</button>
+                 </div>`
+              : ''
+          }
           <h3>How to do it</h3>
           <div class="stepflow">${g.steps
             .map(
@@ -339,7 +357,7 @@ function screenGuide(techId, initialTab = 'guide') {
         </div>
         <div class="card tryout">
           <h3 class="centre">✏️ Try these yourself</h3>
-          <p class="muted centre try-hint">Work it out in your head, then tap Check.</p>
+          <p class="muted centre try-sub">Work it out in your head — stuck? tap 💡 for a hint, then Check.</p>
           ${tryHtml}
         </div>
         <button class="primary-btn big go-practice">I'm ready — let's practise! ✏️</button>
@@ -387,6 +405,41 @@ function screenGuide(techId, initialTab = 'guide') {
       btn.classList.toggle('revealed', reveal);
     });
   });
+  // Guided hint toggles (reveal one nudge before the answer)
+  node.querySelectorAll('.try-hint').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const box = btn.closest('.tryitem').querySelector('.try-hintbox');
+      box.hidden = !box.hidden;
+    });
+  });
+
+  // "Watch it work": reveal one step at a time, narrated, building the answer.
+  if (watchData) {
+    const stage = node.querySelector('.watch-stage');
+    const wbtn = node.querySelector('.watch-btn');
+    let widx = 0;
+    const revealNext = () => {
+      const line = el(
+        `<div class="watch-line"><span class="watch-n">${widx + 1}</span><span>${esc(watchData.steps[widx])}</span></div>`
+      );
+      stage.appendChild(line);
+      speak(watchData.steps[widx]);
+      widx++;
+      if (widx >= watchData.steps.length) {
+        wbtn.textContent = '↺ Replay';
+        stage.appendChild(el('<div class="watch-done">🎉 That’s it — you saw every step!</div>'));
+      } else {
+        wbtn.textContent = 'Next step ▶';
+      }
+    };
+    wbtn.addEventListener('click', () => {
+      if (widx >= watchData.steps.length) {
+        stage.innerHTML = '';
+        widx = 0;
+      }
+      revealNext();
+    });
+  }
 
   // Read aloud (toggle): reads the whole guide, including examples.
   const readText = [

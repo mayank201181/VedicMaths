@@ -1085,4 +1085,33 @@ TECHNIQUES.forEach((t) => {
   t.guide.walkthroughs = WALKTHROUGHS[t.id] || [];
 });
 
+// A one-line, real-life picture-story to land the "why" before the "how".
+const HOOKS = {
+  friends10: 'You have 7 sweets 🍬 — how many more fill a box of 10?',
+  double: 'You have 6 stickers and get the same again ✨ — how many now?',
+  quickadd: 'Two piles of toys 🧸 — how many altogether, quickly?',
+  cleversub: 'You had 53p and spent 28p 🪙 — how much is left?',
+  times10: 'Ten bags, each with the same coins 🪙 — count them in a flash!',
+  times5: 'Five fingers on each hand ✋ — count up in fives!',
+  times9: 'Nine in each box 📦 — how many in 7 boxes? (Almost ten!)',
+  times11: 'Eleven stickers on each page 📄 — how many on one page?',
+  square5: 'A square garden, 35 steps on each side 🌳 — how many squares inside?',
+  nikhilam: 'Two prices just under £1 (97p and 96p) 🛒 — multiply them fast.',
+  urdhva: 'Rows and columns of tiles 🔲 — how many tiles in all?',
+  squareany: 'A square room, 32 tiles on each side 🟦 — how many tiles?',
+  percent: 'A toy costs £80 with 10% off 🏷️ — how much do you save?',
+  bigmult: 'Lots of boxes with lots in each 📦 — find the total quickly.',
+  diffsquares: 'Two numbers either side of a round one (47 and 53) — multiply them.',
+  cubes: 'A cube of blocks, 4 wide, 4 deep, 4 tall 🧊 — how many blocks?',
+  sqrt: 'A square floor has 144 tiles 🔲 — how long is each side?',
+  divisible: 'Can you share these sweets equally with none left over? 🍬',
+  cuberoot: 'A big cube has 729 little blocks 🧊 — how long is each edge?',
+  quickdiv: 'Share 240 marbles into 5 equal bags 🎒 — how many in each?',
+  calendar: 'What day of the week is your birthday this year? 🎂',
+  percentchange: 'An £80 game is 25% off in the sale 🏷️ — what do you pay?',
+};
+TECHNIQUES.forEach((t) => {
+  t.guide.hook = HOOKS[t.id] || '';
+});
+
 export const TECHNIQUE_INDEX = Object.fromEntries(TECHNIQUES.map((t) => [t.id, t]));
