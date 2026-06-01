@@ -967,4 +967,122 @@ TECHNIQUES.forEach((t) => {
   t.tier = TIER_OF[t.id] || 'starter';
 });
 
+// Three fully worked-out, step-by-step examples per technique. A child sees the
+// method three times — read it, follow it, then absorb it.
+const WALKTHROUGHS = {
+  friends10: [
+    { q: '7 + ? = 10', steps: ['Count up from 7: “8, 9, 10”.', 'That is 3 jumps.', 'So the friend is 3.  7 + 3 = 10. ✅'] },
+    { q: '45 + ? = 100', steps: ['First digit from 9: 9 − 4 = 5.', 'Last digit from 10: 10 − 5 = 5.', 'Put together → 55.  Check: 45 + 55 = 100.'] },
+    { q: '63 + ? = 100', steps: ['First digit from 9: 9 − 6 = 3.', 'Last digit from 10: 10 − 3 = 7.', 'So the friend is 37.  Check: 63 + 37 = 100.'] },
+  ],
+  double: [
+    { q: 'Double 6', steps: ['6 and one more 6.', '6 + 6 = 12. ✅'] },
+    { q: 'Double 34', steps: ['Split into 30 and 4.', 'Double 30 → 60.', 'Double 4 → 8.', 'Add them: 60 + 8 = 68.'] },
+    { q: 'Half of 86', steps: ['Split into 80 and 6.', 'Half of 80 → 40.', 'Half of 6 → 3.', 'Add them: 40 + 3 = 43.'] },
+  ],
+  quickadd: [
+    { q: '23 + 5', steps: ['Keep the 20.', 'Add the ones: 3 + 5 = 8.', '20 + 8 = 28.'] },
+    { q: '47 + 36', steps: ['Tens first: 40 + 30 = 70.', 'Ones next: 7 + 6 = 13.', 'Add together: 70 + 13 = 83.'] },
+    { q: '58 + 27', steps: ['Tens: 50 + 20 = 70.', 'Ones: 8 + 7 = 15.', '70 + 15 = 85.'] },
+  ],
+  cleversub: [
+    { q: '53 − 28', steps: ['Round 28 up to 30.', '53 − 30 = 23.', 'Took 2 too many, add 2 back: 23 + 2 = 25.'] },
+    { q: '72 − 19', steps: ['Round 19 up to 20.', '72 − 20 = 52.', 'Add 1 back: 52 + 1 = 53.'] },
+    { q: '145 − 98', steps: ['Round 98 up to 100.', '145 − 100 = 45.', 'Add 2 back: 45 + 2 = 47.'] },
+  ],
+  times10: [
+    { q: '7 × 10', steps: ['Keep the 7.', 'Add ONE zero.', '→ 70.'] },
+    { q: '36 × 100', steps: ['Keep the 36.', 'Add TWO zeros.', '→ 3600.'] },
+    { q: '15 × 1000', steps: ['Keep the 15.', 'Add THREE zeros.', '→ 15000.'] },
+  ],
+  times5: [
+    { q: '6 × 5', steps: ['× 10 first: 6 × 10 = 60.', 'Halve it: half of 60 = 30.', 'So 6 × 5 = 30.'] },
+    { q: '18 × 5', steps: ['× 10: 18 × 10 = 180.', 'Halve: half of 180 = 90.', 'So 18 × 5 = 90.'] },
+    { q: '24 × 5', steps: ['× 10: 24 × 10 = 240.', 'Halve: half of 240 = 120.', 'So 24 × 5 = 120.'] },
+  ],
+  times9: [
+    { q: '7 × 9', steps: ['× 10: 7 × 10 = 70.', 'Take one 7 away: 70 − 7 = 63.'] },
+    { q: '14 × 9', steps: ['× 10: 14 × 10 = 140.', 'Take 14 away: 140 − 14 = 126.'] },
+    { q: '23 × 9', steps: ['× 10: 23 × 10 = 230.', 'Take 23 away: 230 − 23 = 207.'] },
+  ],
+  times11: [
+    { q: '35 × 11', steps: ['Split: 3 _ 5.', 'Add the digits: 3 + 5 = 8.', 'Drop 8 in the middle → 385.'] },
+    { q: '72 × 11', steps: ['Split: 7 _ 2.', 'Add: 7 + 2 = 9.', '→ 792.'] },
+    { q: '76 × 11', steps: ['Split: 7 _ 6.', 'Add: 7 + 6 = 13 — too big!', 'Keep the 3, carry the 1: 7 becomes 8.', '→ 836.'] },
+  ],
+  square5: [
+    { q: '25²', steps: ['Front part is 2.', '2 × next number (3) = 6.', 'Write 25 on the end → 625.'] },
+    { q: '35²', steps: ['Front part is 3.', '3 × 4 = 12.', 'Write 25 → 1225.'] },
+    { q: '85²', steps: ['Front part is 8.', '8 × 9 = 72.', 'Write 25 → 7225.'] },
+  ],
+  nikhilam: [
+    { q: '8 × 7', steps: ['Base 10. Gaps: 10 − 8 = 2, 10 − 7 = 3.', 'Left: 8 − 3 = 5.', 'Right: 2 × 3 = 6.', 'Join → 56.'] },
+    { q: '97 × 96', steps: ['Base 100. Gaps: 3 and 4.', 'Left: 97 − 4 = 93.', 'Right: 3 × 4 = 12.', 'Join → 9312.'] },
+    { q: '98 × 94', steps: ['Gaps from 100: 2 and 6.', 'Left: 98 − 6 = 92.', 'Right: 2 × 6 = 12.', 'Join → 9212.'] },
+  ],
+  urdhva: [
+    { q: '12 × 13', steps: ['Ones: 2 × 3 = 6.', 'Crosswise: 1×3 + 2×1 = 5.', 'Tens: 1 × 1 = 1.', 'Read off → 156.'] },
+    { q: '23 × 41', steps: ['Ones: 3 × 1 = 3.', 'Crosswise: 2×1 + 3×4 = 14 → write 4, carry 1.', 'Tens: 2×4 = 8, + 1 = 9.', 'Read off → 943.'] },
+    { q: '34 × 21', steps: ['Ones: 4 × 1 = 4.', 'Crosswise: 3×1 + 4×2 = 11 → write 1, carry 1.', 'Tens: 3×2 = 6, + 1 = 7.', 'Read off → 714.'] },
+  ],
+  squareany: [
+    { q: '12²', steps: ['Nearest ten is 10. 12 is 2 above.', 'Balanced pair: 10 × 14 = 140.', 'Add 2² = 4.', '140 + 4 = 144.'] },
+    { q: '32²', steps: ['Nearest ten is 30. 32 is 2 above.', 'Balanced pair: 30 × 34 = 1020.', 'Add 2² = 4.', '1020 + 4 = 1024.'] },
+    { q: '48²', steps: ['Nearest ten is 50. 48 is 2 below.', 'Balanced pair: 46 × 50 = 2300.', 'Add 2² = 4.', '2300 + 4 = 2304.'] },
+  ],
+  percent: [
+    { q: '10% of 50', steps: ['10% means a tenth.', '50 ÷ 10 = 5.'] },
+    { q: '20% of 90', steps: ['10% of 90 = 9.', '20% is two tens: 9 + 9 = 18.'] },
+    { q: '15% of 80', steps: ['10% of 80 = 8.', '5% is half of that = 4.', '15% = 8 + 4 = 12.'] },
+  ],
+  bigmult: [
+    { q: '23 × 4', steps: ['20 × 4 = 80.', '3 × 4 = 12.', '80 + 12 = 92.'] },
+    { q: '234 × 12', steps: ['234 × 10 = 2340.', '234 × 2 = 468.', '2340 + 468 = 2808.'] },
+    { q: '45 × 67', steps: ['45 × 60 = 2700.', '45 × 7 = 315.', '2700 + 315 = 3015.'] },
+  ],
+  diffsquares: [
+    { q: '18 × 22', steps: ['Middle is 20 (each 2 away).', '20² = 400.', 'Minus 2² = 4.', '400 − 4 = 396.'] },
+    { q: '47 × 53', steps: ['Middle is 50 (each 3 away).', '50² = 2500.', 'Minus 3² = 9.', '2500 − 9 = 2491.'] },
+    { q: '96 × 104', steps: ['Middle is 100 (each 4 away).', '100² = 10000.', 'Minus 4² = 16.', '10000 − 16 = 9984.'] },
+  ],
+  cubes: [
+    { q: '4³', steps: ['Square first: 4 × 4 = 16.', '× 4 again: 16 × 4 = 64.'] },
+    { q: '7³', steps: ['Square: 7 × 7 = 49.', '× 7 again: 49 × 7 = 343.'] },
+    { q: '12³', steps: ['Square: 12 × 12 = 144.', '× 12 again: 144 × 12 = 1728.'] },
+  ],
+  sqrt: [
+    { q: '√144', steps: ['Which number times itself is 144?', '12 × 12 = 144.', 'So √144 = 12.'] },
+    { q: '√625', steps: ['Ends in 5 → the root ends in 5.', 'Between 20² (400) and 30² (900) → in the 20s.', 'So √625 = 25.'] },
+    { q: '√1764', steps: ['Between 40² (1600) and 50² (2500) → in the 40s.', 'Ends in 4 → root ends in 2 or 8.', '42 × 42 = 1764 → √1764 = 42.'] },
+  ],
+  divisible: [
+    { q: 'Is 738 ÷ 9?', steps: ['Add the digits: 7 + 3 + 8 = 18.', '18 divides by 9.', 'So YES, 738 is divisible by 9.'] },
+    { q: 'Is 1316 ÷ 4?', steps: ['Look at the last two digits: 16.', '16 is a multiple of 4.', 'So YES.'] },
+    { q: 'Is 2728 ÷ 11?', steps: ['Alternate + and −: 2 − 7 + 2 − 8 = −11.', '−11 is a multiple of 11.', 'So YES.'] },
+  ],
+  cuberoot: [
+    { q: '∛729', steps: ['Just one group (under 1000) → one digit.', 'Ends in 9 → root ends in 9.', 'So ∛729 = 9.'] },
+    { q: '∛9261', steps: ['Front group 9 → between 2³ (8) and 3³ (27) → starts with 2.', 'Ends in 1 → ends in 1.', 'So 21.'] },
+    { q: '∛50653', steps: ['Front group 50 → between 3³ (27) and 4³ (64) → starts with 3.', 'Ends in 3 → ends in 7.', 'So 37.'] },
+  ],
+  quickdiv: [
+    { q: '240 ÷ 5', steps: ['× 2: 240 × 2 = 480.', '÷ 10: 480 ÷ 10 = 48.'] },
+    { q: '900 ÷ 25', steps: ['× 4: 900 × 4 = 3600.', '÷ 100: 3600 ÷ 100 = 36.'] },
+    { q: '1300 ÷ 50', steps: ['× 2: 1300 × 2 = 2600.', '÷ 100: 2600 ÷ 100 = 26.'] },
+  ],
+  calendar: [
+    { q: '1 January 2000', steps: ['A well-known anchor date.', 'It falls on a Saturday.'] },
+    { q: '15 August 1947', steps: ['Find the nearest doomsday in 1947 and step across.', 'It lands on a Friday.'] },
+    { q: '25 December 2025', steps: ['12 Dec 2025 is a doomsday — a Friday.', 'From 12 to 25 Dec is 13 days (1 week + 6).', 'Friday + 6 → Thursday.'] },
+  ],
+  percentchange: [
+    { q: 'Decrease 80 by 25%', steps: ['25% of 80 = 20.', 'Take it off: 80 − 20 = 60.'] },
+    { q: 'Increase 200 by 15%', steps: ['10% of 200 = 20, 5% = 10 → 15% = 30.', 'Add it on: 200 + 30 = 230.'] },
+    { q: 'Decrease 120 by 20%', steps: ['10% of 120 = 12 → 20% = 24.', 'Take it off: 120 − 24 = 96.'] },
+  ],
+};
+TECHNIQUES.forEach((t) => {
+  t.guide.walkthroughs = WALKTHROUGHS[t.id] || [];
+});
+
 export const TECHNIQUE_INDEX = Object.fromEntries(TECHNIQUES.map((t) => [t.id, t]));

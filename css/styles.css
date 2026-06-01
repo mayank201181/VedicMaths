@@ -406,19 +406,56 @@ button {
   flex-direction: column;
   gap: 8px;
 }
-.example {
-  background: var(--bg1);
-  border-radius: 12px;
-  padding: 10px 12px;
+/* Detailed worked examples (3 per technique) */
+.walks {
   display: flex;
   flex-direction: column;
+  gap: 12px;
 }
-.ex-q {
-  font-weight: 700;
+.walk {
+  background: var(--bg1);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.walk-q {
+  font-size: 1.3rem;
+  font-weight: 800;
   color: var(--pink-d);
+  margin-bottom: 8px;
 }
-.ex-w {
-  font-size: 0.92rem;
+.walk-badge {
+  display: inline-block;
+  background: var(--pink);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 999px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+.walk-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.walk-step {
+  position: relative;
+  padding-left: 22px;
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+.walk-step::before {
+  content: '▶';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  font-size: 0.7rem;
+  color: var(--green-d);
+}
+.walk-step:last-child {
+  font-weight: 700;
+  color: var(--green-d);
 }
 .tip {
   background: #fff9db;

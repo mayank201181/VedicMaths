@@ -97,7 +97,7 @@ await tick();
 // 3) Guide (now tabbed: Guide / Practice)
 assert.ok($('.diagram svg'), 'guide has an SVG diagram');
 assert.ok($$('.tab-btn').length === 2, 'guide has Guide/Practice tabs');
-assert.ok($$('.example').length >= 5, 'guide shows several worked examples');
+assert.ok($$('.walk').length >= 3, 'guide shows three detailed worked examples');
 assert.ok($('.why') && $('.watchout'), 'guide has why-it-works and watch-out sections');
 
 // "Try these yourself" self-check set with reveal toggle.

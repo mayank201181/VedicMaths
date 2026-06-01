@@ -277,10 +277,13 @@ function screenGuide(techId, initialTab = 'guide') {
   const g = t.guide;
   const recommended = bandStartDifficulty(player);
 
-  const examplesHtml = g.examples
+  const walkHtml = (g.walkthroughs || [])
     .map(
-      (e, i) =>
-        `<div class="example"><span class="ex-num">${i + 1}</span><span class="ex-q">${esc(e.q)}</span><span class="ex-w">${esc(e.work)}</span></div>`
+      (w, i) =>
+        `<div class="walk">
+          <div class="walk-q"><span class="walk-badge">Example ${i + 1}</span> ${esc(w.q)}</div>
+          <div class="walk-steps">${w.steps.map((s) => `<div class="walk-step">${esc(s)}</div>`).join('')}</div>
+        </div>`
     )
     .join('');
 
@@ -330,7 +333,7 @@ function screenGuide(techId, initialTab = 'guide') {
             .join('')}</div>
           ${g.whyItWorks ? `<div class="why"><h3>Why it works</h3><p>${esc(g.whyItWorks)}</p></div>` : ''}
           <h3>Worked examples</h3>
-          <div class="examples">${examplesHtml}</div>
+          <div class="walks">${walkHtml}</div>
           ${g.mistakes ? `<div class="watchout"><b>⚠️ Watch out:</b> ${esc(g.mistakes)}</div>` : ''}
           <p class="tip">💡 ${esc(g.tip)}</p>
         </div>
@@ -392,7 +395,7 @@ function screenGuide(techId, initialTab = 'guide') {
     g.steps.join(' '),
     g.whyItWorks || '',
     'Here are some examples.',
-    g.examples.map((e) => `${e.q}. ${e.work}`).join(' '),
+    (g.walkthroughs || []).map((w) => `${w.q}. ${w.steps.join(' ')}`).join(' '),
     g.mistakes ? 'Watch out. ' + g.mistakes : '',
     g.tip,
   ].join(' ');
