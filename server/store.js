@@ -9,10 +9,29 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
-// Accept either the legacy Vercel KV names or the Upstash-for-Redis marketplace
-// names — whichever the connected database injects.
-const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+// Find the Redis REST credentials regardless of how Vercel named them. The
+// Upstash / KV marketplace integration may use the legacy KV_REST_API_* names,
+// the UPSTASH_REDIS_REST_* names, or a custom prefix (e.g. STORAGE_KV_REST_API_*).
+function discoverKV() {
+  const env = process.env;
+  const known = [
+    ['KV_REST_API_URL', 'KV_REST_API_TOKEN'],
+    ['UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN'],
+  ];
+  for (const [u, t] of known) {
+    if (env[u] && env[t]) return { url: env[u], token: env[t] };
+  }
+  // Fall back to discovering any prefixed REST URL + matching TOKEN pair.
+  for (const key of Object.keys(env)) {
+    if (/(REST_API_URL|REDIS_REST_URL)$/.test(key)) {
+      const tokenKey = key.replace(/URL$/, 'TOKEN');
+      if (env[tokenKey]) return { url: env[key], token: env[tokenKey] };
+    }
+  }
+  return {};
+}
+
+const { url: KV_URL, token: KV_TOKEN } = discoverKV();
 const useKV = Boolean(KV_URL && KV_TOKEN);
 
 const KEY = (name) => 'magicmaths:player:' + String(name).trim().toLowerCase();

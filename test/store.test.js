@@ -3,10 +3,12 @@
 // or the Upstash-for-Redis marketplace var names.
 import assert from 'node:assert';
 
-process.env.UPSTASH_REDIS_REST_URL = 'https://example.upstash.io';
-process.env.UPSTASH_REDIS_REST_TOKEN = 'token';
+// Use a CUSTOM-PREFIXED pair (the trickiest case) to prove auto-discovery works
+// no matter what Vercel's integration names the variables.
+process.env.STORAGE_KV_REST_API_URL = 'https://example.upstash.io';
+process.env.STORAGE_KV_REST_API_TOKEN = 'token';
 
 const { backend } = await import('../server/store.js');
-assert.equal(backend, 'kv', 'store should detect Upstash KV env vars and use Redis');
+assert.equal(backend, 'kv', 'store should auto-discover a prefixed Redis REST var pair');
 
-console.log('✅ Store detects Upstash/Vercel KV env vars.');
+console.log('✅ Store auto-discovers Upstash/Vercel KV env vars (any prefix).');
