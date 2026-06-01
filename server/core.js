@@ -54,6 +54,9 @@ export async function handlePlayerPost(name, body) {
   if (!name) return bad('missing name');
   if (!body || typeof body !== 'object') return bad('missing body');
   const player = ensureShape({ ...body, name });
+  // Owner control wins: a client save can never clear a disabled flag.
+  const existing = await getPlayer(name);
+  if (existing && existing.disabled) player.disabled = true;
   await setPlayer(name, player);
   return ok({ player });
 }
@@ -62,4 +65,49 @@ export async function handlePlayerPost(name, body) {
 export async function handlePlayerList() {
   const players = await listPlayers();
   return ok({ players });
+}
+
+// ---------------------------------------------------------------------------
+// OWNER dashboard — passcode-protected via the OWNER_KEY environment variable.
+// ---------------------------------------------------------------------------
+function ownerAuthed(key) {
+  const expected = process.env.OWNER_KEY;
+  return Boolean(expected) && typeof key === 'string' && key.length > 0 && key === expected;
+}
+
+function summarise(p) {
+  const techs = Object.values(p.techniques || {});
+  return {
+    name: p.name,
+    band: p.band,
+    disabled: Boolean(p.disabled),
+    createdAt: p.createdAt || null,
+    lastActive: p.updatedAt || null,
+    stars: techs.reduce((a, b) => a + (b.stars || 0), 0),
+    crowns: techs.reduce((a, b) => a + (b.crowns || 0), 0),
+    answered: techs.reduce((a, b) => a + (b.attempts || 0), 0),
+  };
+}
+
+// POST /api/owner  body = { key, action: 'list' | 'setDisabled', name?, disabled? }
+export async function handleOwner(body = {}) {
+  if (!process.env.OWNER_KEY) return { status: 503, json: { error: 'owner-not-configured' } };
+  if (!ownerAuthed(body.key)) return { status: 401, json: { error: 'unauthorized' } };
+
+  const action = body.action || 'list';
+  if (action === 'list') {
+    const players = await listPlayers();
+    players.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    return ok({ backend, players: players.map(summarise) });
+  }
+  if (action === 'setDisabled') {
+    if (!body.name) return bad('missing name');
+    const existing = await getPlayer(body.name);
+    if (!existing) return bad('no such player');
+    const player = ensureShape(existing);
+    player.disabled = Boolean(body.disabled);
+    await setPlayer(body.name, player);
+    return ok({ player: summarise(player) });
+  }
+  return bad('unknown action');
 }

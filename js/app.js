@@ -5,7 +5,7 @@ import { APP, TECHNIQUES, TECHNIQUE_INDEX, BANDS, TIERS, DIFFICULTIES } from './
 import { generate } from './vedic.js';
 import { commafy, checkTyped, pickDistinct } from './generators.js';
 import { newPlayer, ensureShape, bandStartDifficulty } from './state.js';
-import { loadPlayer, savePlayer } from './api.js';
+import { loadPlayer, savePlayer, ownerRequest } from './api.js';
 import { loadLocal, lastPlayerName, listLocalPlayers } from './storage.js';
 
 const root = document.getElementById('app');
@@ -137,9 +137,7 @@ function screenWelcome() {
     const existing = await loadPlayer(name);
     player = existing || newPlayer(name, chosenBand);
     if (existing) player.band = chosenBand; // let them update band
-    player = ensureShape(player);
-    await persist();
-    screenDashboard();
+    await enterApp();
   });
 
   // Returning players on this device
@@ -151,9 +149,8 @@ function screenWelcome() {
     known.slice(0, 8).forEach((p) => {
       const chip = el(`<button class="chip">${esc(p.name)}</button>`);
       chip.addEventListener('click', async () => {
-        player = ensureShape((await loadPlayer(p.name)) || p);
-        await persist();
-        screenDashboard();
+        player = (await loadPlayer(p.name)) || p;
+        await enterApp();
       });
       row.appendChild(chip);
     });
@@ -564,24 +561,181 @@ function screenGrownups() {
   show(node);
 }
 
+// Enter the app as the current `player`, blocking disabled profiles.
+async function enterApp() {
+  player = ensureShape(player);
+  if (player.disabled) {
+    screenPaused();
+    return;
+  }
+  await persist();
+  screenDashboard();
+}
+
+// ---------------------------------------------------------------------------
+// PAUSED — shown when the owner has disabled this name
+// ---------------------------------------------------------------------------
+function screenPaused() {
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  const node = el(`
+    <div class="screen welcome">
+      <div class="logo">⏸️</div>
+      <h1 class="app-title">Paused</h1>
+      <div class="card">
+        <p>Hi ${esc(player.name)} — this profile is paused for now. Please check with a grown-up.</p>
+        <button id="switch" class="primary-btn big">Use a different name</button>
+      </div>
+    </div>
+  `);
+  node.querySelector('#switch').addEventListener('click', screenWelcome);
+  show(node);
+}
+
+// ---------------------------------------------------------------------------
+// OWNER dashboard — hidden behind #owner + a passcode (OWNER_KEY env var)
+// ---------------------------------------------------------------------------
+function screenOwnerLogin(message) {
+  const node = el(`
+    <div class="screen welcome">
+      <div class="logo">🔐</div>
+      <h1 class="app-title">Owner</h1>
+      <div class="card">
+        <label class="field-label">Passcode</label>
+        <input id="key" class="text-input big" type="password" placeholder="Enter owner passcode" autocomplete="off" />
+        <button id="go" class="primary-btn big">Unlock</button>
+        <p id="msg" class="muted">${message ? esc(message) : ''}</p>
+        <button id="exit" class="ghost-btn wide">← Back to app</button>
+      </div>
+    </div>
+  `);
+  const keyInput = node.querySelector('#key');
+  const go = async () => {
+    const key = keyInput.value.trim();
+    if (!key) return;
+    node.querySelector('#msg').textContent = 'Checking…';
+    const { status, data } = await ownerRequest({ key, action: 'list' });
+    if (status === 200) {
+      screenOwnerDashboard(key, data);
+    } else if (status === 401) {
+      node.querySelector('#msg').textContent = 'Wrong passcode.';
+    } else if (status === 503) {
+      node.querySelector('#msg').textContent = 'Owner mode is not set up yet (no OWNER_KEY on the server).';
+    } else {
+      node.querySelector('#msg').textContent = 'Could not reach the server.';
+    }
+  };
+  node.querySelector('#go').addEventListener('click', go);
+  keyInput.addEventListener('keydown', (e) => e.key === 'Enter' && go());
+  node.querySelector('#exit').addEventListener('click', () => {
+    window.location.hash = '';
+    screenWelcome();
+  });
+  show(node);
+  setTimeout(() => keyInput.focus(), 50);
+}
+
+function fmtDate(ts) {
+  if (!ts) return '—';
+  try {
+    return new Date(ts).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch (_) {
+    return '—';
+  }
+}
+
+function screenOwnerDashboard(key, data) {
+  const players = data.players || [];
+  const fileWarning =
+    data.backend === 'file'
+      ? `<p class="tip">⚠️ No shared database is connected, so this only shows profiles saved on this server instance. Enable Vercel KV to track everyone across all devices.</p>`
+      : '';
+  const node = el(`
+    <div class="screen grownups">
+      <button class="back-btn">← Back to app</button>
+      <h1>🔐 Owner Dashboard</h1>
+      <p class="muted">${players.length} profile${players.length === 1 ? '' : 's'} · ${players.filter((p) => p.disabled).length} paused</p>
+      ${fileWarning}
+      <div class="card">
+        <table class="progress-table owner-table">
+          <thead><tr><th>Name</th><th>Age</th><th>Joined</th><th>Last active</th><th>Q's</th><th>👑</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <p id="empty" class="muted" ${players.length ? 'hidden' : ''}>No profiles yet.</p>
+      </div>
+    </div>
+  `);
+  node.querySelector('.back-btn').addEventListener('click', () => {
+    window.location.hash = '';
+    screenWelcome();
+  });
+
+  const tbody = node.querySelector('tbody');
+  players.forEach((p) => {
+    const row = el(`
+      <tr class="${p.disabled ? 'row-disabled' : ''}">
+        <td>${esc(p.name)}</td>
+        <td>${esc(p.band || '—')}</td>
+        <td>${fmtDate(p.createdAt)}</td>
+        <td>${fmtDate(p.lastActive)}</td>
+        <td>${p.answered || 0}</td>
+        <td>${p.crowns || 0}</td>
+        <td><button class="mini-btn">${p.disabled ? 'Enable' : 'Disable'}</button></td>
+      </tr>
+    `);
+    const btn = row.querySelector('.mini-btn');
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      const { status, data: res } = await ownerRequest({
+        key,
+        action: 'setDisabled',
+        name: p.name,
+        disabled: !p.disabled,
+      });
+      if (status === 200 && res.player) {
+        p.disabled = res.player.disabled;
+        row.classList.toggle('row-disabled', p.disabled);
+        btn.textContent = p.disabled ? 'Enable' : 'Disable';
+      }
+      btn.disabled = false;
+    });
+    tbody.appendChild(row);
+  });
+
+  show(node);
+}
+
 // ---------------------------------------------------------------------------
 // Boot
 // ---------------------------------------------------------------------------
 async function boot() {
+  if (window.location.hash === '#owner') {
+    screenOwnerLogin();
+    return;
+  }
   const last = lastPlayerName();
   if (last) {
     const local = loadLocal(last);
     if (local) {
       player = ensureShape(local);
-      // refresh from server in the background
+      if (player.disabled) {
+        screenPaused();
+      } else {
+        screenDashboard();
+      }
+      // refresh from server in the background; react if the owner paused them
       loadPlayer(last).then((p) => {
-        if (p) player = p;
+        if (!p) return;
+        player = p;
+        if (player.disabled) screenPaused();
       });
-      screenDashboard();
       return;
     }
   }
   screenWelcome();
 }
+
+window.addEventListener('hashchange', () => {
+  if (window.location.hash === '#owner') screenOwnerLogin();
+});
 
 boot();

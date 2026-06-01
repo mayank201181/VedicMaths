@@ -620,6 +620,30 @@ button {
   height: 22px;
 }
 
+/* Owner dashboard */
+.owner-table {
+  font-size: 0.82rem;
+}
+.owner-table td,
+.owner-table th {
+  padding: 7px 5px;
+}
+.owner-table .row-disabled {
+  opacity: 0.5;
+}
+.mini-btn {
+  background: var(--pink);
+  color: #fff;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.row-disabled .mini-btn {
+  background: var(--green-d);
+}
+
 /* Confetti */
 .confetti {
   position: fixed;
