@@ -1,11 +1,14 @@
-# ✨ Magic Maths — Vedic & Mental Maths for Kids (ages 5–12)
+# ✨ Magic Maths — Vedic & Mental Maths for every age (5 to grown-up)
 
-A colourful, kid-friendly web app to **learn and practise Vedic Maths and mental-maths
-shortcuts**. A child types their name, picks their age, and gets a dashboard of techniques —
+A colourful, friendly web app to **learn and practise Vedic Maths and mental-maths
+shortcuts**. You type your name, pick your age, and get a dashboard of techniques —
 each one a mini-course with a guide, diagrams and read-aloud, followed by an **endless,
 auto-generated question bank** at three levels.
 
-Share it by link with any child. No accounts, no ads.
+Content spans **young children right through to adults**, grouped into four tiers
+(Starter · Junior · Teen · Master) so everyone sees the right material first.
+
+Share it by link with anyone. No accounts, no ads.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/mayank201181/VedicMaths)
 
@@ -13,9 +16,10 @@ Share it by link with any child. No accounts, no ads.
 
 ## What it does
 
-- **Name to start**, then an **age-band picker** (5–6 / 7–8 / 9–10 / 11–12) that sets the
-  starting difficulty so the content fits the child.
-- **All techniques shown right away on the dashboard** — tap any one to learn it.
+- **Name to start**, then an **age-band picker** (5–6 / 7–8 / 9–10 / 11–12 / 13–16 / 16+)
+  that sets the starting difficulty and opens the matching tier first.
+- **Techniques grouped into tiers** (Starter · Junior · Teen · Master) on the dashboard;
+  the tier for your age opens automatically and the rest are one tap away.
 - Each technique is a **mini-course**: intro, step-by-step method, worked examples, an
   **SVG diagram** and a 🔊 **read-aloud** button.
 - **Three levels per technique:**
@@ -29,10 +33,14 @@ Share it by link with any child. No accounts, no ads.
 
 ### Techniques included
 
-Friends of 10 & 100 (*all from 9, last from 10*) · Doubling & Halving · Quick Adding ·
-Clever Subtracting · ×10/100/1000 · the 5 / 9 / 11 tricks · Squares ending in 5
-(*Ekādhikena*) · Near a Base (*Nikhilam*) · Vertically & Crosswise (*Ūrdhva-Tiryak*) ·
-Square Any 2-Digit · Easy Percentages.
+- **Starter (5–8):** Friends of 10 & 100 (*all from 9, last from 10*) · Doubling & Halving ·
+  Quick Adding · Clever Subtracting · ×10/100/1000 · the 5 / 9 / 11 tricks.
+- **Junior (9–12):** Squares ending in 5 (*Ekādhikena*) · Near a Base (*Nikhilam*) ·
+  Vertically & Crosswise (*Ūrdhva-Tiryak*) · Square Any 2-Digit · Easy Percentages.
+- **Teen (13–16):** Multiply Any Numbers · Difference of Squares · Cubes · Square Roots ·
+  Divisibility Tricks.
+- **Master (16+):** Cube Roots · Quick Dividing (÷5/25/50) · Day of the Week · Discounts
+  & Percentage Changes.
 
 > Questions are **generated in code**, not stored in lists — so practice is infinite and
 > each harder batch simply scales the numbers up. See `js/vedic.js`.
@@ -82,7 +90,7 @@ No `npm install` needed to run the app (zero dependencies).
 ### Tests
 
 ```bash
-npm test                # generator sweep (390k questions) + API handler tests
+npm test                # generator sweep (660k questions) + API handler tests
 # optional headless UI click-through:
 npm install --no-save jsdom && node test/ui.test.js
 ```

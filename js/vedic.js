@@ -14,26 +14,31 @@
 // (api/question.js + the validation sweep), so it must stay free of browser
 // or Node specific APIs.
 
-import { rand, pick, numChoices, commafy } from './generators.js';
+import { rand, pick, shuffle, numChoices, commafy } from './generators.js';
 
 const isMC = (d) => d === 0;
 
 // A small standard envelope so each generator stays short.
-function make({ text, answer, difficulty, hint, explanation, visual = null, choiceOpts = {}, accept = [] }) {
-  const base = {
-    text,
-    visual,
-    answer,
-    hint,
-    explanation,
-    speak: text,
-  };
+// For numeric answers, multiple-choice options are built automatically; for
+// text answers (Yes/No, day names) pass an explicit `choices` array.
+function make({
+  text,
+  answer,
+  difficulty,
+  hint,
+  explanation,
+  visual = null,
+  choiceOpts = {},
+  choices = null,
+  accept = [],
+}) {
+  const base = { text, visual, answer, hint, explanation, speak: text };
   if (isMC(difficulty)) {
-    base.choices = numChoices(answer, choiceOpts);
+    base.choices = choices ? shuffle(choices.slice()) : numChoices(answer, choiceOpts);
     base.accept = [String(answer)];
   } else {
     base.choices = null;
-    base.accept = [String(answer), commafy(answer), ...accept];
+    base.accept = [String(answer), ...(typeof answer === 'number' ? [commafy(answer)] : []), ...accept];
   }
   return base;
 }
@@ -41,6 +46,14 @@ function make({ text, answer, difficulty, hint, explanation, visual = null, choi
 // Pick a base (10 / 100 / 1000 …) that grows with difficulty + level.
 const growExp = (difficulty, level, max = 4) =>
   Math.min(1 + difficulty + Math.floor(level / 2), max);
+
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+const dayName = (y, m, d) => DAYS[new Date(Date.UTC(y, m, d)).getUTCDay()];
+const daysInMonth = (y, m) => new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
 
 // ---------------------------------------------------------------------------
 const GEN = {
@@ -368,6 +381,184 @@ const GEN = {
           ? `25% is a quarter: ${base} ÷ 4 = ${answer}.`
           : `10% of ${base} = ${base / 10}, 5% = ${base / 20}. ${pct}% = ${answer}.`,
       choiceOpts: { spread: 10, min: 0 },
+    });
+  },
+
+  // ----- Multiply Any Numbers (general Ūrdhva) ----------------------------
+  bigmult({ difficulty, level }) {
+    let a, b;
+    if (difficulty === 0) {
+      a = rand(11, 99);
+      b = rand(2, 9);
+    } else if (difficulty === 1) {
+      a = rand(21, 99) + level;
+      b = rand(21, 99) + level;
+    } else {
+      a = rand(111, 999) + level * 7;
+      b = rand(12, 99);
+    }
+    const tens = b - (b % 10);
+    return make({
+      difficulty,
+      text: `${a} × ${b}`,
+      answer: a * b,
+      hint: 'Split the smaller number into tens and units, then add.',
+      explanation:
+        b % 10 === 0 || tens === 0
+          ? `${a} × ${b} = ${commafy(a * b)}.`
+          : `${a} × ${b} = ${a} × ${tens} + ${a} × ${b % 10} = ${commafy(a * tens)} + ${commafy(a * (b % 10))} = ${commafy(a * b)}.`,
+      choiceOpts: { spread: Math.max(12, Math.floor((a * b) / 12)), min: 0 },
+    });
+  },
+
+  // ----- Difference of squares: (a−b)(a+b) = a²−b² ------------------------
+  diffsquares({ difficulty, level }) {
+    const mid = [rand(2, 5) * 10, rand(2, 9) * 10, rand(3, 20) * 10 + level * 10][difficulty];
+    const d = [rand(1, 4), rand(1, 9), rand(2, 12)][difficulty];
+    const a = mid - d;
+    const b = mid + d;
+    return make({
+      difficulty,
+      text: `${a} × ${b}`,
+      answer: a * b,
+      hint: `Both numbers are ${d} away from ${mid}.`,
+      explanation: `${mid}² − ${d}² = ${commafy(mid * mid)} − ${d * d} = ${commafy(a * b)}.`,
+      choiceOpts: { spread: 40, min: 0 },
+    });
+  },
+
+  // ----- Cubes ------------------------------------------------------------
+  cubes({ difficulty, level }) {
+    const n = [rand(2, 12), rand(2, 20) + level, rand(11, 30) + level][difficulty];
+    return make({
+      difficulty,
+      text: `${n}³`,
+      answer: n * n * n,
+      hint: 'Square it first, then multiply by the number once more.',
+      explanation: `${n}² = ${n * n}, then × ${n} = ${commafy(n * n * n)}.`,
+      choiceOpts: { spread: Math.max(20, n * n), min: 0 },
+    });
+  },
+
+  // ----- Square roots of perfect squares ----------------------------------
+  sqrt({ difficulty, level }) {
+    const k = [rand(2, 12), rand(10, 30) + level, rand(20, 60) + level][difficulty];
+    const n = k * k;
+    return make({
+      difficulty,
+      text: `√${n}`,
+      answer: k,
+      hint: 'Which number times itself gives this?',
+      explanation: `${k} × ${k} = ${commafy(n)}, so √${commafy(n)} = ${k}.`,
+      choiceOpts: { spread: 5, min: 1 },
+    });
+  },
+
+  // ----- Divisibility tricks (Yes/No) -------------------------------------
+  divisible({ difficulty, level }) {
+    const div = [pick([2, 5, 10, 3]), pick([3, 4, 9, 6]), pick([4, 9, 11, 6])][difficulty];
+    const size = [rand(20, 200), rand(100, 999), rand(1000, 9999) + level][difficulty];
+    // Make a "Yes" roughly half the time by snapping to a multiple.
+    const n = Math.random() < 0.5 ? Math.round(size / div) * div : size;
+    const yes = n % div === 0;
+    const answer = yes ? 'Yes' : 'No';
+    const tests = {
+      2: 'check the last digit is even',
+      3: 'add the digits and see if that divides by 3',
+      4: 'check the last two digits make a multiple of 4',
+      5: 'check it ends in 0 or 5',
+      6: 'it must work for both 2 and 3',
+      9: 'add the digits and see if that divides by 9',
+      10: 'check it ends in 0',
+      11: 'alternately add and subtract the digits',
+    };
+    const digitSum = String(n).split('').reduce((s, c) => s + +c, 0);
+    const extra =
+      div === 3 || div === 9
+        ? ` Digit sum = ${digitSum}.`
+        : div === 4
+        ? ` Last two digits = ${String(n).slice(-2)}.`
+        : '';
+    return make({
+      difficulty,
+      text: `Is ${commafy(n)} divisible by ${div}?`,
+      answer,
+      choices: ['Yes', 'No'],
+      accept: yes ? ['yes', 'y'] : ['no', 'n'],
+      hint: `To test for ${div}, ${tests[div]}.`,
+      explanation: `${commafy(n)} ÷ ${div} ${yes ? 'is exact' : 'leaves a remainder'}, so the answer is ${answer}.${extra}`,
+    });
+  },
+
+  // ----- Cube roots of perfect cubes --------------------------------------
+  cuberoot({ difficulty, level }) {
+    const k = [rand(2, 9), rand(11, 30), rand(31, 70) + level][difficulty];
+    const n = k * k * k;
+    const lastMap = { 0: 0, 1: 1, 8: 2, 7: 3, 4: 4, 5: 5, 6: 6, 3: 7, 2: 8, 9: 9 };
+    const lastDigit = n % 10;
+    return make({
+      difficulty,
+      text: `∛${n}`,
+      answer: k,
+      hint: 'The last digit of the answer comes from the last digit of the number.',
+      explanation: `${k} × ${k} × ${k} = ${commafy(n)}. It ends in ${lastDigit}, so the root ends in ${lastMap[lastDigit]} → ${k}.`,
+      choiceOpts: { spread: 4, min: 1 },
+    });
+  },
+
+  // ----- Quick dividing by 5 / 25 / 50 ------------------------------------
+  quickdiv({ difficulty, level }) {
+    const div = [5, pick([5, 25]), pick([25, 50])][difficulty];
+    const q = [rand(2, 20), rand(4, 40) + level, rand(6, 80) + level][difficulty];
+    const n = q * div;
+    const recipe =
+      div === 5
+        ? `× 2 = ${n * 2}, ÷ 10 = ${q}`
+        : div === 25
+        ? `× 4 = ${commafy(n * 4)}, ÷ 100 = ${q}`
+        : `× 2 = ${commafy(n * 2)}, ÷ 100 = ${q}`;
+    return make({
+      difficulty,
+      text: `${commafy(n)} ÷ ${div}`,
+      answer: q,
+      hint: div === 5 ? 'Double it, then divide by 10.' : `Multiply by ${100 / div}, then divide by 100.`,
+      explanation: `${commafy(n)} ÷ ${div}: ${recipe}.`,
+      choiceOpts: { spread: 8, min: 0 },
+    });
+  },
+
+  // ----- Day of the week --------------------------------------------------
+  calendar({ difficulty, level }) {
+    const year = [rand(2001, 2030), rand(1950, 2050), rand(1900, 2099)][difficulty];
+    const m = rand(0, 11);
+    const d = rand(1, daysInMonth(year, m));
+    const answer = dayName(year, m, d);
+    const others = shuffle(DAYS.filter((x) => x !== answer)).slice(0, 3);
+    return make({
+      difficulty,
+      text: `What day of the week is ${d} ${MONTHS[m]} ${year}?`,
+      answer,
+      choices: [answer, ...others],
+      accept: [answer.toLowerCase(), answer.slice(0, 3).toLowerCase()],
+      hint: 'Find the nearest doomsday for the year, then step across in 7s.',
+      explanation: `${d} ${MONTHS[m]} ${year} falls on a ${answer}.`,
+    });
+  },
+
+  // ----- Discounts & percentage changes -----------------------------------
+  percentchange({ difficulty, level }) {
+    const up = Math.random() < 0.5;
+    const pct = [pick([10, 50]), pick([20, 25]), pick([15, 25, 30, 40])][difficulty];
+    const base = [rand(2, 9) * 10, rand(2, 12) * 20, rand(3, 15) * 20 + level * 20][difficulty];
+    const piece = (base * pct) / 100;
+    const answer = up ? base + piece : base - piece;
+    return make({
+      difficulty,
+      text: `${up ? 'Increase' : 'Decrease'} ${base} by ${pct}%`,
+      answer,
+      hint: `First find ${pct}% of ${base}, then ${up ? 'add it on' : 'take it off'}.`,
+      explanation: `${pct}% of ${base} = ${piece}. ${base} ${up ? '+' : '−'} ${piece} = ${answer}.`,
+      choiceOpts: { spread: 12, min: 0 },
     });
   },
 };

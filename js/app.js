@@ -1,7 +1,7 @@
 // js/app.js
 // Screens + ONE shared quiz engine that drives every technique.
 
-import { APP, TECHNIQUES, TECHNIQUE_INDEX, BANDS, DIFFICULTIES } from './content.js';
+import { APP, TECHNIQUES, TECHNIQUE_INDEX, BANDS, TIERS, DIFFICULTIES } from './content.js';
 import { generate } from './vedic.js';
 import { commafy, checkTyped } from './generators.js';
 import { newPlayer, ensureShape, bandStartDifficulty } from './state.js';
@@ -188,6 +188,7 @@ function techCard(t) {
 function screenDashboard() {
   const totalStars = Object.values(player.techniques).reduce((a, b) => a + b.stars, 0);
   const totalCrowns = Object.values(player.techniques).reduce((a, b) => a + b.crowns, 0);
+  const myTier = (BANDS.find((b) => b.id === player.band) || {}).tier || 'starter';
   const node = el(`
     <div class="screen dashboard">
       <div class="topbar">
@@ -201,11 +202,34 @@ function screenDashboard() {
         </div>
       </div>
       <div class="score-strip">⭐ ${totalStars} &nbsp;•&nbsp; 👑 ${totalCrowns}</div>
-      <div class="tech-grid"></div>
+      <div class="tiers"></div>
     </div>
   `);
-  const grid = node.querySelector('.tech-grid');
-  TECHNIQUES.forEach((t) => grid.appendChild(techCard(t)));
+
+  const tiersBox = node.querySelector('.tiers');
+  TIERS.forEach((tier) => {
+    const items = TECHNIQUES.filter((t) => t.tier === tier.id);
+    if (!items.length) return;
+    const open = tier.id === myTier;
+    const section = el(`
+      <section class="tier-section ${open ? 'open' : ''}">
+        <button class="tier-head">
+          <span class="tier-title">${tier.emoji} ${tier.label}</span>
+          <span class="tier-blurb">${tier.blurb} · ${items.length}</span>
+          <span class="tier-chevron">${open ? '▾' : '▸'}</span>
+        </button>
+        <div class="tech-grid"></div>
+      </section>
+    `);
+    const grid = section.querySelector('.tech-grid');
+    items.forEach((t) => grid.appendChild(techCard(t)));
+    section.querySelector('.tier-head').addEventListener('click', () => {
+      const isOpen = section.classList.toggle('open');
+      section.querySelector('.tier-chevron').textContent = isOpen ? '▾' : '▸';
+    });
+    tiersBox.appendChild(section);
+  });
+
   node.querySelector('#switch').addEventListener('click', () => {
     window.speechSynthesis && window.speechSynthesis.cancel();
     screenWelcome();

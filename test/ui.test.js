@@ -69,7 +69,14 @@ await tick(60);
 
 // 2) Dashboard
 assert.ok($('.hi').textContent.includes('Tester'), 'greeting shows name');
-assert.ok($$('.tech-card').length >= 10, 'all techniques shown on dashboard');
+assert.ok($$('.tier-section').length >= 4, 'techniques grouped into tier sections');
+assert.ok($('.tier-section.open'), 'a tier section opens by default');
+assert.ok($$('.tech-card').length >= 20, 'all techniques (incl. teen + master) shown');
+// A collapsed tier opens when its header is tapped.
+const collapsed = $$('.tier-section').find((s) => !s.classList.contains('open'));
+assert.ok(collapsed, 'has a collapsed tier');
+collapsed.querySelector('.tier-head').click();
+assert.ok(collapsed.classList.contains('open'), 'tapping a tier header expands it');
 $$('.tech-card')[0].click();
 await tick();
 

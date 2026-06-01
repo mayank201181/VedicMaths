@@ -5,17 +5,30 @@
 
 export const APP = {
   name: 'Magic Maths',
-  tagline: 'Vedic & Mental Maths for clever kids',
-  version: 7, // bump when state shape or content changes (drives ensureShape)
+  tagline: 'Vedic & Mental Maths for every age',
+  version: 8, // bump when state shape or content changes (drives ensureShape)
 };
 
-// Age bands set the *starting* difficulty when a child opens a technique.
+// Age bands set the *starting* difficulty when someone opens a technique, and
+// which dashboard tier opens first.
 // 0 = Basic (multiple choice), 1 = Intermediate (typed), 2 = Advanced (typed).
 export const BANDS = [
-  { id: '5-6', label: '5–6', emoji: '🐣', startDifficulty: 0 },
-  { id: '7-8', label: '7–8', emoji: '🦊', startDifficulty: 0 },
-  { id: '9-10', label: '9–10', emoji: '🦉', startDifficulty: 1 },
-  { id: '11-12', label: '11–12', emoji: '🚀', startDifficulty: 2 },
+  { id: '5-6', label: '5–6', emoji: '🐣', startDifficulty: 0, tier: 'starter' },
+  { id: '7-8', label: '7–8', emoji: '🦊', startDifficulty: 0, tier: 'starter' },
+  { id: '9-10', label: '9–10', emoji: '🦉', startDifficulty: 1, tier: 'junior' },
+  { id: '11-12', label: '11–12', emoji: '🚀', startDifficulty: 2, tier: 'junior' },
+  { id: '13-16', label: '13–16', emoji: '🎓', startDifficulty: 2, tier: 'teen' },
+  { id: '16+', label: '16+', emoji: '🧠', startDifficulty: 2, tier: 'master' },
+];
+
+// Dashboard tiers — techniques are grouped under these so the map stays tidy as
+// it grows. The tier matching the player's band opens first; the rest are
+// one tap away.
+export const TIERS = [
+  { id: 'starter', label: 'Starter', emoji: '🌱', blurb: 'Ages 5–8' },
+  { id: 'junior', label: 'Junior', emoji: '🚀', blurb: 'Ages 9–12' },
+  { id: 'teen', label: 'Teen', emoji: '🎓', blurb: 'Ages 13–16' },
+  { id: 'master', label: 'Master', emoji: '🧠', blurb: '16+ / Grown-ups' },
 ];
 
 export const DIFFICULTIES = [
@@ -476,6 +489,297 @@ export const TECHNIQUES = [
       ),
     },
   },
+
+  // ===== TEEN (13–16) =======================================================
+  {
+    id: 'bigmult',
+    name: 'Multiply Any Numbers',
+    emoji: '✳️',
+    color: '#ffe3e3',
+    sutra: 'Ūrdhva-Tiryagbhyām for everything',
+    tagline: 'Crosswise multiplication scales up to any size.',
+    crownGoal: CROWN_GOAL,
+    guide: {
+      intro:
+        'The vertically-and-crosswise sutra is not just for two digits — it multiplies numbers ' +
+        'of any size in a single line. You sweep through pairs of digits, carrying as you go.',
+      steps: [
+        'For 3-digit × 2-digit, line them up and take crosswise products column by column.',
+        'Or split the smaller number: 234 × 12 = 234 × 10 + 234 × 2.',
+        '= 2340 + 468 = 2808.',
+      ],
+      examples: [
+        { q: '23 × 47', work: 'units 21, crosswise 26, tens 8 → 1081.' },
+        { q: '234 × 12', work: '2340 + 468 = 2808.' },
+        { q: '125 × 24', work: '2500 + 500 = 3000.' },
+      ],
+      tip: 'Splitting by tens and units is the same idea written more simply — use whichever is faster.',
+      diagram: svg(
+        `<text x="20" y="55" font-size="22" font-weight="700" fill="#495057">234 × 12</text>
+         <text x="20" y="95" font-size="20" fill="#1c7ed6">234 × 10 = 2340</text>
+         <text x="20" y="125" font-size="20" fill="#e8590c">234 × 2 = 468</text>
+         <text x="20" y="160" font-size="22" font-weight="800" fill="#2f9e44">2340 + 468 = 2808</text>`
+      ),
+    },
+  },
+  {
+    id: 'diffsquares',
+    name: 'Difference of Squares',
+    emoji: '🔷',
+    color: '#d0bfff',
+    sutra: '(a − b)(a + b) = a² − b²',
+    tagline: 'Multiply numbers either side of a round number, fast.',
+    crownGoal: CROWN_GOAL,
+    guide: {
+      intro:
+        'When two numbers sit the same distance either side of a round number, their product is ' +
+        'just that round number squared minus the gap squared.',
+      steps: [
+        '47 × 53 sit either side of 50 (3 away each).',
+        'Middle squared: 50² = 2500.',
+        'Minus the gap squared: 2500 − 3² = 2500 − 9 = 2491.',
+      ],
+      examples: [
+        { q: '47 × 53', work: '50² − 3² = 2500 − 9 = 2491.' },
+        { q: '18 × 22', work: '20² − 2² = 400 − 4 = 396.' },
+        { q: '96 × 104', work: '100² − 4² = 10000 − 16 = 9984.' },
+      ],
+      tip: 'It only works when the two numbers share the same midpoint — spot the round number in the middle.',
+      diagram: svg(
+        `<text x="20" y="55" font-size="22" font-weight="700" fill="#495057">47 × 53  (around 50)</text>
+         <text x="20" y="100" font-size="22" fill="#7048e8">50² − 3²</text>
+         <text x="20" y="140" font-size="22" font-weight="800" fill="#2f9e44">2500 − 9 = 2491</text>`
+      ),
+    },
+  },
+  {
+    id: 'cubes',
+    name: 'Cubes',
+    emoji: '🧊',
+    color: '#a5d8ff',
+    sutra: 'Multiply three times — smartly',
+    tagline: 'Raise numbers to the third power without long sums.',
+    crownGoal: CROWN_GOAL,
+    guide: {
+      intro:
+        'A cube is a number times itself three times. Build it in two easy hops: square first, ' +
+        'then multiply by the number once more.',
+      steps: [
+        'For 7³, first square: 7² = 49.',
+        'Then multiply by 7 again: 49 × 7 = 343.',
+        'So 7³ = 343.',
+      ],
+      examples: [
+        { q: '4³', work: '4² = 16, × 4 = 64.' },
+        { q: '7³', work: '49 × 7 = 343.' },
+        { q: '12³', work: '144 × 12 = 1728.' },
+      ],
+      tip: 'Knowing your squares makes cubes one extra step away.',
+      diagram: svg(
+        `<text x="20" y="60" font-size="24" font-weight="700" fill="#495057">7³</text>
+         <text x="20" y="105" font-size="22" fill="#1c7ed6">7 × 7 = 49</text>
+         <text x="20" y="145" font-size="22" font-weight="800" fill="#2f9e44">49 × 7 = 343</text>`
+      ),
+    },
+  },
+  {
+    id: 'sqrt',
+    name: 'Square Roots',
+    emoji: '√',
+    color: '#c3fae8',
+    sutra: 'What times itself makes this?',
+    tagline: 'Find the square root of a perfect square in your head.',
+    crownGoal: CROWN_GOAL,
+    guide: {
+      intro:
+        'A square root undoes a square. For a perfect square you can pin it down from two clues: ' +
+        'how big it is, and what its last digit is.',
+      steps: [
+        'Size: 1225 is between 30² (900) and 40² (1600), so the root is in the 30s.',
+        'Last digit: it ends in 5, and only 5² ends in 5 → the root ends in 5.',
+        'Put it together: √1225 = 35.',
+      ],
+      examples: [
+        { q: '√144', work: '12 × 12 = 144 → 12.' },
+        { q: '√625', work: 'ends in 5, in the 20s → 25.' },
+        { q: '√1764', work: 'between 40² and 50², ends in 4 (2 or 8) → 42.' },
+      ],
+      tip: 'Last digits: 1→1/9, 4→2/8, 9→3/7, 6→4/6, 5→5, 0→0. The size tells you which.',
+      diagram: svg(
+        `<text x="20" y="55" font-size="22" font-weight="700" fill="#495057">√1225</text>
+         <text x="20" y="95" font-size="20" fill="#1c7ed6">30² = 900, 40² = 1600 → 30s</text>
+         <text x="20" y="130" font-size="20" fill="#e8590c">ends in 5 → root ends in 5</text>
+         <text x="20" y="165" font-size="22" font-weight="800" fill="#2f9e44">= 35</text>`
+      ),
+    },
+  },
+  {
+    id: 'divisible',
+    name: 'Divisibility Tricks',
+    emoji: '🔍',
+    color: '#ffec99',
+    sutra: 'Tests without dividing',
+    tagline: 'Tell instantly if a number divides exactly.',
+    crownGoal: CROWN_GOAL,
+    guide: {
+      intro:
+        'You can check whether a number divides exactly without doing the division — each divisor ' +
+        'has its own quick test.',
+      steps: [
+        'By 3 or 9: add up all the digits. If that total divides by 3 (or 9), so does the number.',
+        'By 4: look only at the last two digits — if they make a multiple of 4, it works.',
+        'By 11: alternately add and subtract the digits; if the result is 0 or a multiple of 11, yes.',
+      ],
+      examples: [
+        { q: 'Is 738 divisible by 9?', work: '7+3+8 = 18, divisible by 9 → Yes.' },
+        { q: 'Is 1316 divisible by 4?', work: 'last two digits 16, a multiple of 4 → Yes.' },
+        { q: 'Is 2728 divisible by 11?', work: '2−7+2−8 = −11 → Yes.' },
+      ],
+      tip: 'By 6 means divisible by both 2 and 3.',
+      diagram: svg(
+        `<text x="20" y="55" font-size="22" font-weight="700" fill="#495057">738 ÷ 9?</text>
+         <text x="20" y="95" font-size="20" fill="#1c7ed6">7 + 3 + 8 = 18</text>
+         <text x="20" y="130" font-size="20" fill="#2f9e44">18 ÷ 9 = 2 ✓</text>
+         <text x="20" y="165" font-size="22" font-weight="800" fill="#d6336c">Yes!</text>`
+      ),
+    },
+  },
+
+  // ===== MASTER (16+ / grown-ups) ==========================================
+  {
+    id: 'cuberoot',
+    name: 'Cube Roots',
+    emoji: '∛',
+    color: '#bac8ff',
+    sutra: 'Last digit gives it away',
+    tagline: 'Cube roots of perfect cubes — almost instantly.',
+    crownGoal: CROWN_GOAL,
+    guide: {
+      intro:
+        'For a perfect cube, the LAST digit of the answer is fixed by the last digit of the number, ' +
+        'and the FIRST digit comes from the leading group. Two digits, no division.',
+      steps: [
+        'Split off the last three digits. The front part of 50653 is 50.',
+        'First digit: 3³ = 27 ≤ 50 < 64 = 4³, so it starts with 3.',
+        'Last digit: the cube ends in 3, and only 7³ ends in 3 → ends in 7. Answer 37.',
+      ],
+      examples: [
+        { q: '∛729', work: 'ends in 9 → root ends 9; one group → 9.' },
+        { q: '∛9261', work: 'front 9 → starts 2; ends 1 → ends 1 → 21.' },
+        { q: '∛50653', work: 'front 50 → starts 3; ends 3 → ends 7 → 37.' },
+      ],
+      tip: 'Last-digit map: 1→1, 8→2, 7→3, 4→4, 5→5, 6→6, 3→7, 2→8, 9→9, 0→0.',
+      diagram: svg(
+        `<text x="20" y="55" font-size="22" font-weight="700" fill="#495057">∛50653</text>
+         <text x="20" y="95" font-size="20" fill="#1c7ed6">50 → starts with 3</text>
+         <text x="20" y="130" font-size="20" fill="#e8590c">ends 3 → ends in 7</text>
+         <text x="20" y="165" font-size="22" font-weight="800" fill="#2f9e44">= 37</text>`
+      ),
+    },
+  },
+  {
+    id: 'quickdiv',
+    name: 'Quick Dividing',
+    emoji: '➗',
+    color: '#b2f2bb',
+    sutra: 'Turn division into easy multiplication',
+    tagline: 'Divide by 5, 25 or 50 by multiplying instead.',
+    crownGoal: CROWN_GOAL,
+    guide: {
+      intro:
+        'Dividing by 5, 25 or 50 is awkward — but each is a tidy fraction of a power of ten, so you ' +
+        'can multiply and shift instead.',
+      steps: [
+        '÷ 5  is the same as × 2 then ÷ 10.   240 ÷ 5 = 480 ÷ 10 = 48.',
+        '÷ 25 is the same as × 4 then ÷ 100.  900 ÷ 25 = 3600 ÷ 100 = 36.',
+        '÷ 50 is the same as × 2 then ÷ 100.  900 ÷ 50 = 1800 ÷ 100 = 18.',
+      ],
+      examples: [
+        { q: '240 ÷ 5', work: '× 2 = 480, ÷ 10 = 48.' },
+        { q: '900 ÷ 25', work: '× 4 = 3600, ÷ 100 = 36.' },
+        { q: '1300 ÷ 50', work: '× 2 = 2600, ÷ 100 = 26.' },
+      ],
+      tip: 'It works because 5 = 10⁄2, 25 = 100⁄4 and 50 = 100⁄2.',
+      diagram: svg(
+        `<text x="20" y="55" font-size="22" font-weight="700" fill="#495057">240 ÷ 5</text>
+         <text x="20" y="95" font-size="20" fill="#2b8a3e">240 × 2 = 480</text>
+         <text x="20" y="135" font-size="22" font-weight="800" fill="#2f9e44">480 ÷ 10 = 48</text>`
+      ),
+    },
+  },
+  {
+    id: 'calendar',
+    name: 'Day of the Week',
+    emoji: '📅',
+    color: '#ffd8a8',
+    sutra: 'Every date has an anchor day',
+    tagline: 'Work out the weekday of any date — a classic mental feat.',
+    crownGoal: CROWN_GOAL,
+    guide: {
+      intro:
+        'Every year has an "anchor" weekday that certain easy dates always land on. Find the nearest ' +
+        'anchor, then count the days across to your date. With practice it is almost instant.',
+      steps: [
+        'Each year has a doomsday — dates like 4/4, 6/6, 8/8, 10/10, 12/12 all fall on it.',
+        'For the 2000s, 2000 started on a Tuesday; add the year plus its leap-years and reduce by 7.',
+        'Step from the nearest doomsday to your date, counting weekdays.',
+      ],
+      examples: [
+        { q: 'What day is 4 July 2026?', work: '2026 doomsday is Saturday; 4 July → Saturday.' },
+        { q: 'What day is 25 December 2025?', work: 'count from 12/12 (Friday) → Thursday.' },
+        { q: 'What day is 1 January 2000?', work: 'Saturday.' },
+      ],
+      tip: 'It is fine to count forwards or backwards in 7s — weekdays repeat every 7 days.',
+      diagram: svg(
+        `<text x="20" y="50" font-size="20" font-weight="700" fill="#495057">Doomsdays land on:</text>
+         <text x="20" y="85" font-size="18" fill="#1c7ed6">4/4 · 6/6 · 8/8 · 10/10 · 12/12</text>
+         <text x="20" y="125" font-size="18" fill="#e8590c">find the nearest one…</text>
+         <text x="20" y="160" font-size="20" font-weight="800" fill="#2f9e44">…then step to your date</text>`
+      ),
+    },
+  },
+  {
+    id: 'percentchange',
+    name: 'Discounts & Changes',
+    emoji: '🏷️',
+    color: '#d8f5a2',
+    sutra: 'Build the change from 10%',
+    tagline: 'Add or knock off a percentage — sales, tips and tax.',
+    crownGoal: CROWN_GOAL,
+    guide: {
+      intro:
+        'Real-life percentages are about increasing or decreasing an amount. Find the percentage ' +
+        'piece (built from 10%), then add it on or take it off.',
+      steps: [
+        'Decrease 80 by 25%: 25% of 80 = 20.',
+        'Take it off: 80 − 20 = 60.',
+        'To increase instead, you would add the piece on: 80 + 20 = 100.',
+      ],
+      examples: [
+        { q: 'Decrease 80 by 25%', work: '25% = 20, 80 − 20 = 60.' },
+        { q: 'Increase 200 by 15%', work: '15% = 30, 200 + 30 = 230.' },
+        { q: 'Decrease 50 by 10%', work: '10% = 5, 50 − 5 = 45.' },
+      ],
+      tip: 'A 20% tip on a bill: find 10%, double it. A 25% sale: take off a quarter.',
+      diagram: svg(
+        `<text x="20" y="55" font-size="22" font-weight="700" fill="#495057">Decrease 80 by 25%</text>
+         <text x="20" y="100" font-size="22" fill="#2b8a3e">25% of 80 = 20</text>
+         <text x="20" y="140" font-size="22" font-weight="800" fill="#2f9e44">80 − 20 = 60</text>`
+      ),
+    },
+  },
 ];
+
+// Which dashboard tier each technique belongs to.
+const TIER_OF = {
+  friends10: 'starter', double: 'starter', quickadd: 'starter', cleversub: 'starter',
+  times10: 'starter', times5: 'starter', times9: 'starter', times11: 'starter',
+  square5: 'junior', nikhilam: 'junior', urdhva: 'junior', squareany: 'junior', percent: 'junior',
+  bigmult: 'teen', diffsquares: 'teen', cubes: 'teen', sqrt: 'teen', divisible: 'teen',
+  cuberoot: 'master', quickdiv: 'master', calendar: 'master', percentchange: 'master',
+};
+TECHNIQUES.forEach((t) => {
+  t.tier = TIER_OF[t.id] || 'starter';
+});
 
 export const TECHNIQUE_INDEX = Object.fromEntries(TECHNIQUES.map((t) => [t.id, t]));
