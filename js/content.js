@@ -262,12 +262,12 @@ export const TECHNIQUES = [
         'Count the zeros carefully — × 100 adds two zeros, × 1000 adds three. One zero too few or too many changes the answer hugely.',
       tip: 'Count the zeros in the 10/100/1000 — that is how many zeros you add.',
       diagram: svg(
-        `<text x="20" y="80" font-size="30" font-weight="700" fill="#495057">24</text>
-         <text x="70" y="80" font-size="26" fill="#0c8599">× 100 =</text>
-         <text x="185" y="80" font-size="30" font-weight="800" fill="#d6336c">24</text>
-         <text x="240" y="80" font-size="30" font-weight="800" fill="#69db7c">00</text>
-         <text x="185" y="120" font-size="18" fill="#0c8599">same</text>
-         <text x="238" y="120" font-size="18" fill="#2f9e44">+2 zeros</text>`
+        `<text x="160" y="26" font-size="15" text-anchor="middle" fill="#495057">× 10 → digits stay, add a 0</text>
+         <rect x="78" y="60" width="42" height="52" rx="8" fill="#fff" stroke="#0c8599" stroke-width="3"/><text x="99" y="96" font-size="26" text-anchor="middle" font-weight="800" fill="#0c8599">2</text>
+         <rect x="120" y="60" width="42" height="52" rx="8" fill="#fff" stroke="#0c8599" stroke-width="3"/><text x="141" y="96" font-size="26" text-anchor="middle" font-weight="800" fill="#0c8599">4</text>
+         <rect x="162" y="60" width="38" height="52" rx="8" fill="#d3f9d8" stroke="#2f9e44" stroke-width="3"/><text x="181" y="96" font-size="26" text-anchor="middle" font-weight="800" fill="#2f9e44">0</text>
+         <text x="181" y="130" font-size="13" text-anchor="middle" fill="#2f9e44">new zero</text>
+         <text x="160" y="158" font-size="20" text-anchor="middle" font-weight="800" fill="#495057">24 × 10 = 240</text>`
       ),
     },
   },
@@ -302,9 +302,13 @@ export const TECHNIQUES = [
         'Multiply by 10 first, then halve — not the other way round.',
       tip: 'If the number is odd, halving 10× still works: 7 × 5 → 70 → 35.',
       diagram: svg(
-        `<text x="20" y="75" font-size="26" font-weight="700" fill="#495057">18 × 5</text>
-         <text x="20" y="120" font-size="24" fill="#e8590c">18 × 10 = 180</text>
-         <text x="20" y="160" font-size="24" font-weight="800" fill="#2f9e44">half of 180 = 90</text>`
+        `<text x="160" y="26" font-size="15" text-anchor="middle" fill="#495057">× 5 = × 10, then halve</text>
+         <rect x="26" y="64" width="74" height="46" rx="10" fill="#fff" stroke="#e8590c" stroke-width="3"/><text x="63" y="94" font-size="22" text-anchor="middle" font-weight="800" fill="#e8590c">18</text>
+         <text x="106" y="80" font-size="14" fill="#495057">×10</text>
+         <text x="140" y="94" font-size="22" fill="#495057">→</text>
+         <rect x="164" y="64" width="86" height="46" rx="10" fill="#ffe8cc" stroke="#e8590c" stroke-width="3"/><text x="207" y="94" font-size="22" text-anchor="middle" font-weight="800" fill="#e8590c">180</text>
+         <text x="262" y="80" font-size="13" fill="#2f9e44">halve</text>
+         <text x="160" y="150" font-size="22" text-anchor="middle" font-weight="800" fill="#2f9e44">half of 180 = 90</text>`
       ),
     },
   },
@@ -340,9 +344,15 @@ export const TECHNIQUES = [
         'Subtract the whole number, not 1 — 7 × 9 is 70 − 7, not 70 − 1.',
       tip: 'On the 9 times table the two digits always add up to 9 (e.g. 6×9=54, 5+4=9).',
       diagram: svg(
-        `<text x="20" y="75" font-size="26" font-weight="700" fill="#495057">7 × 9</text>
-         <text x="20" y="120" font-size="24" fill="#1c7ed6">7 × 10 = 70</text>
-         <text x="20" y="160" font-size="24" font-weight="800" fill="#2f9e44">70 − 7 = 63</text>`
+        `<text x="160" y="22" font-size="14" text-anchor="middle" fill="#495057">7 × 9: fold finger 7 → 6 | 3 = 63</text>
+         ${Array.from({ length: 10 }, (_, i) => {
+           const x = 22 + i * 29;
+           if (i === 6) return `<rect x="${x}" y="80" width="18" height="38" rx="8" fill="#ced4da"/>`;
+           return `<rect x="${x}" y="48" width="18" height="70" rx="9" fill="${i < 6 ? '#74c0fc' : '#69db7c'}"/>`;
+         }).join('')}
+         <text x="100" y="140" font-size="15" text-anchor="middle" fill="#1c7ed6">6 tens</text>
+         <text x="262" y="140" font-size="15" text-anchor="middle" fill="#2f9e44">3 ones</text>
+         <text x="160" y="168" font-size="20" text-anchor="middle" font-weight="800" fill="#d6336c">= 63</text>`
       ),
     },
   },
@@ -378,12 +388,14 @@ export const TECHNIQUES = [
         'If the middle sum reaches 10 or more, carry the 1 to the left: 76 × 11, the middle is 13, so the 7 becomes 8 → 836.',
       tip: 'If the middle sum is 10 or more, carry the 1 to the left digit.',
       diagram: svg(
-        `<text x="40" y="90" font-size="40" font-weight="800" fill="#d6336c">3</text>
-         <text x="150" y="90" font-size="40" font-weight="800" fill="#d6336c">5</text>
-         <text x="92" y="90" font-size="40" font-weight="800" fill="#2f9e44">8</text>
-         <path d="M55 60 C 80 35, 120 35, 145 60" fill="none" stroke="#69db7c" stroke-width="3"/>
-         <text x="100" y="40" font-size="18" text-anchor="middle" fill="#2f9e44">3 + 5</text>
-         <text x="230" y="90" font-size="30" fill="#495057">= 385</text>`
+        `<text x="160" y="26" font-size="14" text-anchor="middle" fill="#495057">35 × 11: add the digits, drop in the middle</text>
+         <text x="62" y="110" font-size="44" font-weight="800" fill="#d6336c">3</text>
+         <text x="154" y="110" font-size="44" font-weight="800" fill="#2f9e44">8</text>
+         <text x="246" y="110" font-size="44" font-weight="800" fill="#d6336c">5</text>
+         <path d="M74 72 C 108 48, 150 48, 158 68" fill="none" stroke="#69db7c" stroke-width="3"/>
+         <path d="M256 72 C 222 48, 178 48, 168 68" fill="none" stroke="#69db7c" stroke-width="3"/>
+         <text x="160" y="54" font-size="15" text-anchor="middle" fill="#2f9e44">3 + 5 = 8</text>
+         <text x="160" y="152" font-size="20" text-anchor="middle" font-weight="800" fill="#495057">= 385</text>`
       ),
     },
   },
@@ -419,13 +431,13 @@ export const TECHNIQUES = [
         'Multiply the front part by the NEXT number up, not by itself, and always tack on 25.',
       tip: 'Every answer ends in 25. Only the front part changes.',
       diagram: svg(
-        `<text x="20" y="70" font-size="26" font-weight="700" fill="#495057">35² </text>
-         <text x="90" y="70" font-size="22" fill="#d6336c">3 × (3+1) = 12</text>
-         <rect x="20" y="95" width="80" height="45" rx="8" fill="#fff" stroke="#f783ac" stroke-width="3"/>
-         <text x="60" y="126" font-size="26" font-weight="800" fill="#d6336c">12</text>
-         <rect x="105" y="95" width="80" height="45" rx="8" fill="#fff" stroke="#69db7c" stroke-width="3"/>
-         <text x="145" y="126" font-size="26" font-weight="800" fill="#2f9e44">25</text>
-         <text x="205" y="126" font-size="24" fill="#495057">= 1225</text>`
+        `<text x="160" y="26" font-size="15" text-anchor="middle" fill="#495057">35²: front × next number, then write 25</text>
+         <rect x="46" y="56" width="104" height="58" rx="10" fill="#fff" stroke="#f783ac" stroke-width="3"/>
+         <text x="98" y="84" font-size="18" text-anchor="middle" fill="#d6336c">3 × 4</text>
+         <text x="98" y="106" font-size="15" text-anchor="middle" fill="#868e96">= 12</text>
+         <rect x="160" y="56" width="104" height="58" rx="10" fill="#d3f9d8" stroke="#2f9e44" stroke-width="3"/>
+         <text x="212" y="94" font-size="26" text-anchor="middle" font-weight="800" fill="#2f9e44">25</text>
+         <text x="160" y="150" font-size="20" text-anchor="middle" font-weight="800" fill="#495057">→ 1225</text>`
       ),
     },
   },
@@ -462,15 +474,17 @@ export const TECHNIQUES = [
         'The right part must fill the right number of digits (two for base 100). If it overflows, carry the extra into the left part.',
       tip: 'The right part must fill the right number of digits (2 for base 100). Carry if it overflows.',
       diagram: svg(
-        `<text x="20" y="45" font-size="22" font-weight="700" fill="#495057">97  (−3)</text>
-         <text x="20" y="75" font-size="22" font-weight="700" fill="#495057">96  (−4)</text>
-         <line x1="20" y1="88" x2="160" y2="88" stroke="#adb5bd" stroke-width="2"/>
-         <text x="20" y="125" font-size="24" font-weight="800" fill="#1c7ed6">93</text>
-         <text x="60" y="125" font-size="24" font-weight="800" fill="#495057">|</text>
-         <text x="80" y="125" font-size="24" font-weight="800" fill="#2f9e44">12</text>
-         <path d="M120 40 L 70 70" stroke="#fa5252" stroke-width="2"/>
-         <path d="M120 70 L 70 40" stroke="#fa5252" stroke-width="2"/>
-         <text x="180" y="125" font-size="22" fill="#495057">= 9312</text>`
+        `<text x="160" y="22" font-size="14" text-anchor="middle" fill="#495057">Both near 100: cross-subtract, multiply the gaps</text>
+         <text x="48" y="64" font-size="24" font-weight="700" fill="#495057">97</text><text x="100" y="64" font-size="17" fill="#fa5252">(−3)</text>
+         <text x="48" y="94" font-size="24" font-weight="700" fill="#495057">96</text><text x="100" y="94" font-size="17" fill="#fa5252">(−4)</text>
+         <path d="M58 72 L 96 88" stroke="#fa5252" stroke-width="2"/><path d="M96 72 L 58 88" stroke="#fa5252" stroke-width="2"/>
+         <line x1="40" y1="104" x2="150" y2="104" stroke="#adb5bd" stroke-width="2"/>
+         <text x="55" y="134" font-size="26" font-weight="800" fill="#1c7ed6">93</text>
+         <text x="92" y="134" font-size="22" fill="#495057">|</text>
+         <text x="110" y="134" font-size="26" font-weight="800" fill="#2f9e44">12</text>
+         <text x="200" y="92" font-size="15" fill="#1c7ed6">97 − 4 = 93</text>
+         <text x="200" y="116" font-size="15" fill="#2f9e44">3 × 4 = 12</text>
+         <text x="200" y="142" font-size="18" font-weight="800" fill="#d6336c">= 9312</text>`
       ),
     },
   },
@@ -590,10 +604,10 @@ export const TECHNIQUES = [
         'For 20% take two lots of 10% — don’t divide 10% again.',
       tip: '50% = half, 25% = a quarter, 1% = divide by 100.',
       diagram: svg(
-        `<text x="20" y="55" font-size="24" font-weight="700" fill="#495057">10% of 80 = 8</text>
-         <text x="20" y="95" font-size="22" fill="#2b8a3e">20% = 8 + 8 = 16</text>
-         <text x="20" y="135" font-size="22" fill="#2b8a3e">5% = 8 ÷ 2 = 4</text>
-         <text x="20" y="170" font-size="22" font-weight="800" fill="#d6336c">15% = 12</text>`
+        `<text x="160" y="28" font-size="15" text-anchor="middle" fill="#495057">10% = one slice out of ten</text>
+         ${Array.from({ length: 10 }, (_, i) => `<rect x="${20 + i * 28}" y="64" width="26" height="46" rx="4" fill="${i === 0 ? '#2f9e44' : '#d3f9d8'}" stroke="#2f9e44" stroke-width="2"/>`).join('')}
+         <text x="33" y="130" font-size="13" text-anchor="middle" fill="#2f9e44">10%</text>
+         <text x="160" y="158" font-size="20" text-anchor="middle" font-weight="800" fill="#495057">10% of 80 = 8</text>`
       ),
     },
   },

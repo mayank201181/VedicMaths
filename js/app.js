@@ -284,6 +284,20 @@ function screenGuide(techId, initialTab = 'guide') {
     )
     .join('');
 
+  // "Try these yourself" — a few self-check problems generated at the child's
+  // level (same generators as Practice, so the answers are always correct).
+  const showAns = (a) => (typeof a === 'number' ? commafy(a) : esc(String(a)));
+  const tryUsed = new Set();
+  let tryLast = null;
+  const tryHtml = Array.from({ length: 3 }, () => {
+    const q = pickDistinct(() => generate(techId, { difficulty: recommended, level: 0 }), tryUsed, tryLast);
+    tryLast = q.text;
+    return `<div class="tryitem">
+        <div class="try-row"><span class="try-q">${esc(q.text)}</span><button class="try-reveal">Check</button></div>
+        <div class="try-ans" hidden><span class="try-big">= ${showAns(q.answer)}</span><span class="try-exp">${esc(q.explanation)}</span></div>
+      </div>`;
+  }).join('');
+
   const node = el(`
     <div class="screen guide" style="--card:${t.color}">
       <button class="back-btn">← Back</button>
@@ -320,6 +334,11 @@ function screenGuide(techId, initialTab = 'guide') {
           ${g.mistakes ? `<div class="watchout"><b>⚠️ Watch out:</b> ${esc(g.mistakes)}</div>` : ''}
           <p class="tip">💡 ${esc(g.tip)}</p>
         </div>
+        <div class="card tryout">
+          <h3 class="centre">✏️ Try these yourself</h3>
+          <p class="muted centre try-hint">Work it out in your head, then tap Check.</p>
+          ${tryHtml}
+        </div>
         <button class="primary-btn big go-practice">I'm ready — let's practise! ✏️</button>
       </div>
 
@@ -354,6 +373,17 @@ function screenGuide(techId, initialTab = 'guide') {
   };
   tabBtns.forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
   node.querySelector('.go-practice').addEventListener('click', () => setTab('practice'));
+
+  // "Try these yourself" reveal toggles
+  node.querySelectorAll('.try-reveal').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const ans = btn.closest('.tryitem').querySelector('.try-ans');
+      const reveal = ans.hidden;
+      ans.hidden = !reveal;
+      btn.textContent = reveal ? 'Hide' : 'Check';
+      btn.classList.toggle('revealed', reveal);
+    });
+  });
 
   // Read aloud (toggle): reads the whole guide, including examples.
   const readText = [

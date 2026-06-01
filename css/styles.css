@@ -490,6 +490,59 @@ button {
   background: #fff;
   color: var(--pink-d);
 }
+
+/* Try these yourself */
+.tryout .try-hint {
+  margin-top: 0;
+}
+.tryitem {
+  background: var(--bg1);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin: 10px 0;
+}
+.try-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.try-q {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.try-reveal {
+  background: var(--pink);
+  color: #fff;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  box-shadow: 0 3px 0 var(--pink-d);
+}
+.try-reveal.revealed {
+  background: #adb5bd;
+  box-shadow: 0 3px 0 #868e96;
+}
+.try-ans {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 2px dashed #ffd6e0;
+}
+.try-big {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--green-d);
+}
+.try-exp {
+  display: block;
+  font-size: 0.9rem;
+  color: #5c5f63;
+  margin-top: 4px;
+}
 .diff-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

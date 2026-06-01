@@ -100,6 +100,15 @@ assert.ok($$('.tab-btn').length === 2, 'guide has Guide/Practice tabs');
 assert.ok($$('.example').length >= 5, 'guide shows several worked examples');
 assert.ok($('.why') && $('.watchout'), 'guide has why-it-works and watch-out sections');
 
+// "Try these yourself" self-check set with reveal toggle.
+assert.ok($$('.tryitem').length >= 3, 'guide has a Try-these-yourself set');
+const tryBtn = $$('.try-reveal')[0];
+assert.ok($$('.try-ans')[0].hidden, 'answer hidden before reveal');
+tryBtn.click();
+assert.ok(!$$('.try-ans')[0].hidden, 'tapping Check reveals the answer');
+tryBtn.click();
+assert.ok($$('.try-ans')[0].hidden, 'tapping again hides it');
+
 // Read-aloud button is a real toggle: tap = start, tap again = stop.
 const speakBtn = $('.speak-btn');
 speakBtn.click();
