@@ -414,12 +414,13 @@ function renderQuestion() {
     const grid = el('<div class="choice-grid"></div>');
     q.choices.forEach((c) => {
       const b = el(`<button class="choice-btn">${commafy(c)}</button>`);
+      b._value = c; // keep the real value (number OR string) for exact comparison
       b.addEventListener('click', () => {
         if (answered) return;
         const correct = c === q.answer;
         node.querySelectorAll('.choice-btn').forEach((btn) => {
           btn.disabled = true;
-          if (Number(btn.textContent.replace(/,/g, '')) === q.answer) btn.classList.add('is-right');
+          if (btn._value === q.answer) btn.classList.add('is-right');
         });
         if (!correct) b.classList.add('is-wrong');
         finish(correct);

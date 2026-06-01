@@ -57,16 +57,17 @@ export function normalizeAnswer(s) {
 }
 
 // Compare a typed answer against a set of accepted strings (and numerically).
+// The numeric fallback only triggers when the WHOLE normalised input is a clean
+// number, so loose input like "12x" can never be misread as 12.
 export function checkTyped(input, accept = [], answer = null) {
   const norm = normalizeAnswer(input);
   if (norm === '') return false;
   for (const a of accept) {
     if (normalizeAnswer(a) === norm) return true;
   }
-  const numIn = parseFloat(norm);
-  if (!Number.isNaN(numIn) && answer !== null) {
-    const numAns = parseFloat(normalizeAnswer(String(answer)));
-    if (!Number.isNaN(numAns) && Math.abs(numIn - numAns) < 1e-9) return true;
+  if (answer !== null && /^-?\d+(?:\.\d+)?$/.test(norm)) {
+    const numAns = Number(normalizeAnswer(String(answer)));
+    if (Number.isFinite(numAns) && Math.abs(Number(norm) - numAns) < 1e-9) return true;
   }
   return false;
 }
