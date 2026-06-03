@@ -11,6 +11,7 @@ import { loadLocal, lastPlayerName, listLocalPlayers } from './storage.js';
 const root = document.getElementById('app');
 let player = null;
 let session = null; // { techId, difficulty, level, total, done, score, streak, crownAwarded, q }
+let pendingWelcome = false; // show a "welcome back" toast on the next dashboard
 
 const BATCH = 25;
 
@@ -141,6 +142,21 @@ function esc(s) {
   return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
 
+// A floating banner that slides in, then auto-dismisses (tap to close).
+function toast(html, ms = 4500) {
+  const t = el(`<div class="toast">${html}</div>`);
+  document.body.appendChild(t);
+  const show = () => t.classList.add('show');
+  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(show);
+  else show();
+  const hide = () => {
+    t.classList.remove('show');
+    setTimeout(() => t.remove(), 400);
+  };
+  t.addEventListener('click', hide);
+  setTimeout(hide, ms);
+}
+
 async function persist() {
   if (player) await savePlayer(player);
 }
@@ -191,6 +207,7 @@ function screenWelcome() {
     const existing = await loadPlayer(name);
     player = existing || newPlayer(name, chosenBand);
     if (existing) player.band = chosenBand; // let them update band
+    pendingWelcome = Boolean(existing); // returning player → welcome back
     await enterApp();
   });
 
@@ -204,6 +221,7 @@ function screenWelcome() {
       const chip = el(`<button class="chip">${esc(p.name)}</button>`);
       chip.addEventListener('click', async () => {
         player = (await loadPlayer(p.name)) || p;
+        pendingWelcome = true;
         await enterApp();
       });
       row.appendChild(chip);
@@ -295,6 +313,16 @@ function screenDashboard() {
   node.querySelector('#leaderboard').addEventListener('click', screenLeaderboard);
   node.querySelector('#speed').addEventListener('click', screenSpeedSetup);
   show(node);
+
+  if (pendingWelcome) {
+    pendingWelcome = false;
+    // Only celebrate a real return (they've earned something before).
+    if (player.coins > 0 || totalCrowns > 0 || totalStars > 0) {
+      toast(
+        `👋 Welcome back, <b>${esc(player.name)}</b>! Your progress is saved — 🪙 ${player.coins} coins, 👑 ${totalCrowns} crowns.`
+      );
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1185,6 +1213,7 @@ async function boot() {
       if (player.disabled) {
         screenPaused();
       } else {
+        pendingWelcome = true; // returning on this device
         screenDashboard();
       }
       // refresh from server in the background; react if the owner paused them
