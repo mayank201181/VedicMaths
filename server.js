@@ -9,6 +9,7 @@ import {
   handlePlayerGet,
   handlePlayerPost,
   handleOwner,
+  handleLeaderboard,
 } from './server/core.js';
 
 const PORT = process.env.PORT || 3000;
@@ -70,6 +71,9 @@ const server = http.createServer(async (req, res) => {
     if (p === '/api/owner') {
       if (req.method !== 'POST') return sendJSON(res, { status: 405, json: { error: 'method-not-allowed' } });
       return sendJSON(res, await handleOwner(await readBody(req)));
+    }
+    if (p === '/api/leaderboard') {
+      return sendJSON(res, await handleLeaderboard(req.method === 'POST' ? await readBody(req) : {}));
     }
     if (p.startsWith('/api/player/')) {
       const name = decodeURIComponent(p.slice('/api/player/'.length));

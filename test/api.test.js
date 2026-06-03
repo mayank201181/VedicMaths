@@ -11,9 +11,8 @@ import os from 'node:os';
 const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'mm-'));
 process.chdir(tmp);
 
-const { handleContent, handleQuestion, handleOwner, handlePlayerPost, handlePlayerGet } = await import(
-  '../server/core.js'
-);
+const { handleContent, handleQuestion, handleOwner, handlePlayerPost, handlePlayerGet, handleLeaderboard } =
+  await import('../server/core.js');
 const contentFn = (await import('../api/content.js')).default;
 const questionFn = (await import('../api/question.js')).default;
 const playerFn = (await import('../api/player.js')).default;
@@ -107,6 +106,14 @@ assert.equal((await handlePlayerGet('Tester')).json.player.disabled, true, 'disa
 await handleOwner({ key: 'secret123', action: 'setDisabled', name: 'Tester', disabled: false });
 assert.equal((await handlePlayerGet('Tester')).json.player.disabled, false, 're-enabled');
 delete process.env.OWNER_KEY;
+
+// --- leaderboard (nicknames only, never real names) ---
+await handlePlayerPost('Tester', { name: 'Tester', band: '9-10', nickname: 'TNinja', coins: 50 });
+const lb = await handleLeaderboard({ name: 'Tester' });
+assert.equal(lb.status, 200);
+assert.ok(lb.json.top.some((r) => r.nickname === 'TNinja'), 'leaderboard lists the nickname');
+assert.ok(!JSON.stringify(lb.json).includes('Tester'), 'leaderboard never exposes the real name');
+assert.ok(lb.json.you && lb.json.you.rank >= 1, 'computes your rank');
 
 // helper: turn a string body into req.on('data'/'end') emitter
 function makeBodyEmitter(str) {

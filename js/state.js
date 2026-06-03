@@ -32,6 +32,9 @@ export function ensureShape(player) {
   if (typeof player.settings.sound !== 'boolean') player.settings.sound = true;
   if (typeof player.settings.voice !== 'boolean') player.settings.voice = true;
   if (typeof player.disabled !== 'boolean') player.disabled = false;
+  if (typeof player.coins !== 'number') player.coins = 0;
+  if (typeof player.nickname !== 'string') player.nickname = '';
+  if (!player.speedBest || typeof player.speedBest !== 'object') player.speedBest = {};
   player.techniques = player.techniques || {};
   for (const t of TECHNIQUES) {
     const cur = player.techniques[t.id] || {};

@@ -6,7 +6,7 @@
 export const APP = {
   name: 'Magic Maths',
   tagline: 'Vedic & Mental Maths for every age',
-  version: 8, // bump when state shape or content changes (drives ensureShape)
+  version: 9, // bump when state shape or content changes (drives ensureShape)
 };
 
 // Age bands set the *starting* difficulty when someone opens a technique, and

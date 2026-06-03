@@ -78,6 +78,32 @@ export async function handlePlayerList() {
   return ok({ players });
 }
 
+// POST /api/leaderboard  body = { name? }  — PUBLIC, shows nicknames only.
+const crownsOf = (p) => Object.values(p.techniques || {}).reduce((a, b) => a + (b.crowns || 0), 0);
+export async function handleLeaderboard(body = {}) {
+  try {
+    const players = await listPlayers();
+    const ranked = players
+      .filter((p) => p && p.nickname && !p.disabled)
+      .map((p) => ({ nickname: p.nickname, coins: p.coins || 0, crowns: crownsOf(p) }))
+      .sort((a, b) => b.coins - a.coins || b.crowns - a.crowns);
+    const top = ranked.slice(0, 30);
+    let you = null;
+    if (body.name) {
+      const me = players.find(
+        (p) => p && p.name && p.name.toLowerCase() === String(body.name).toLowerCase()
+      );
+      if (me && me.nickname && !me.disabled) {
+        const myCoins = me.coins || 0;
+        you = { rank: ranked.filter((r) => r.coins > myCoins).length + 1, nickname: me.nickname, coins: myCoins };
+      }
+    }
+    return ok({ top, you, total: ranked.length });
+  } catch (e) {
+    return ok({ top: [], you: null, total: 0, error: 'storage-unavailable' });
+  }
+}
+
 // ---------------------------------------------------------------------------
 // OWNER dashboard — passcode-protected via the OWNER_KEY environment variable.
 // ---------------------------------------------------------------------------

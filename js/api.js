@@ -60,6 +60,20 @@ export async function getContent() {
   }
 }
 
+// Public leaderboard (nicknames + coins). Returns null when offline.
+export async function getLeaderboard(name) {
+  try {
+    const res = await fetch('/api/leaderboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    return await res.json();
+  } catch (_) {
+    return null;
+  }
+}
+
 // Owner dashboard call. Returns { status, data } so the UI can tell apart
 // 200 (ok), 401 (wrong passcode) and 503 (OWNER_KEY not configured).
 export async function ownerRequest(body) {

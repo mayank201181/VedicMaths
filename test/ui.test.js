@@ -91,6 +91,19 @@ const collapsed = $$('.tier-section').find((s) => !s.classList.contains('open'))
 assert.ok(collapsed, 'has a collapsed tier');
 collapsed.querySelector('.tier-head').click();
 assert.ok(collapsed.classList.contains('open'), 'tapping a tier header expands it');
+// Hub buttons: trophies + speed-test screens open (leaderboard needs network).
+assert.ok($('#trophies') && $('#leaderboard') && $('#speed'), 'dashboard has hub buttons');
+$('#trophies').click();
+await tick();
+assert.ok($('.big-coins'), 'trophies screen shows coins');
+$('.back-btn').click();
+await tick();
+$('#speed').click();
+await tick();
+assert.ok($('.dur-grid'), 'speed-test setup opens');
+$('.back-btn').click();
+await tick();
+
 $$('.tech-card')[0].click();
 await tick();
 

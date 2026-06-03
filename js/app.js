@@ -5,7 +5,7 @@ import { APP, TECHNIQUES, TECHNIQUE_INDEX, BANDS, TIERS, DIFFICULTIES } from './
 import { generate } from './vedic.js';
 import { commafy, checkTyped, pickDistinct } from './generators.js';
 import { newPlayer, ensureShape, bandStartDifficulty } from './state.js';
-import { loadPlayer, savePlayer, ownerRequest } from './api.js';
+import { loadPlayer, savePlayer, ownerRequest, getLeaderboard } from './api.js';
 import { loadLocal, lastPlayerName, listLocalPlayers } from './storage.js';
 
 const root = document.getElementById('app');
@@ -252,7 +252,12 @@ function screenDashboard() {
           <button id="switch" class="ghost-btn" title="Switch player">🔄</button>
         </div>
       </div>
-      <div class="score-strip">⭐ ${totalStars} &nbsp;•&nbsp; 👑 ${totalCrowns}</div>
+      <div class="score-strip">⭐ ${totalStars} &nbsp;•&nbsp; 👑 ${totalCrowns} &nbsp;•&nbsp; 🪙 ${player.coins}</div>
+      <div class="hub-row">
+        <button id="trophies" class="hub-btn">🏅<span>Trophies</span></button>
+        <button id="leaderboard" class="hub-btn">🏆<span>Leaderboard</span></button>
+        <button id="speed" class="hub-btn">⏱️<span>Speed Test</span></button>
+      </div>
       <div class="tiers"></div>
     </div>
   `);
@@ -286,6 +291,9 @@ function screenDashboard() {
     screenWelcome();
   });
   node.querySelector('#grownups').addEventListener('click', screenGrownups);
+  node.querySelector('#trophies').addEventListener('click', screenTrophies);
+  node.querySelector('#leaderboard').addEventListener('click', screenLeaderboard);
+  node.querySelector('#speed').addEventListener('click', screenSpeedSetup);
   show(node);
 }
 
@@ -594,12 +602,15 @@ function renderQuestion() {
     answered = true;
     const st = player.techniques[session.techId];
     st.attempts++;
+    let coinGain = 0;
     if (correct) {
       st.correct++;
       st.stars++;
       session.score++;
       session.streak++;
       st.bestStreak = Math.max(st.bestStreak, session.streak);
+      coinGain = (session.difficulty + 1) + (session.streak % 5 === 0 ? 3 : 0); // harder + streak = more
+      player.coins += coinGain;
       goodSound();
     } else {
       session.streak = 0;
@@ -609,7 +620,7 @@ function renderQuestion() {
     feedback.hidden = false;
     feedback.className = 'feedback ' + (correct ? 'right' : 'wrong');
     feedback.innerHTML = correct
-      ? `<div class="fb-head">🎉 Correct!</div>`
+      ? `<div class="fb-head">🎉 Correct! <span class="coin-gain">+${coinGain} 🪙</span></div>`
       : `<div class="fb-head">Not quite — the answer is <b>${commafy(q.answer)}</b></div>`;
     feedback.appendChild(el(`<p class="explain">${esc(q.explanation)}</p>`));
     if (!correct) speak(`Not quite. ${q.explanation}`);
@@ -618,8 +629,9 @@ function renderQuestion() {
     if (!session.crownAwarded && session.score >= t.crownGoal) {
       session.crownAwarded = true;
       st.crowns++;
+      player.coins += 10; // crown bonus
       confetti();
-      feedback.appendChild(el(`<p class="crown-msg">👑 You earned a crown!</p>`));
+      feedback.appendChild(el(`<p class="crown-msg">👑 You earned a crown! +10 🪙</p>`));
     }
 
     hintBtn.disabled = true;
@@ -919,6 +931,241 @@ function screenOwnerDashboard(key, data) {
     tbody.appendChild(row);
   });
 
+  show(node);
+}
+
+// ---------------------------------------------------------------------------
+// TROPHIES — kid-facing reward summary
+// ---------------------------------------------------------------------------
+function screenTrophies() {
+  const totalStars = Object.values(player.techniques).reduce((a, b) => a + b.stars, 0);
+  const totalCrowns = Object.values(player.techniques).reduce((a, b) => a + b.crowns, 0);
+  const earned = TECHNIQUES.filter((t) => player.techniques[t.id].crowns > 0);
+  const node = el(`
+    <div class="screen trophies">
+      <button class="back-btn">← Back</button>
+      <h1>🏅 ${esc(player.name)}'s Trophies</h1>
+      <div class="big-coins">🪙 ${player.coins} <span>coins</span></div>
+      <div class="score-strip">⭐ ${totalStars} stars &nbsp;•&nbsp; 👑 ${totalCrowns} crowns</div>
+      <div class="card">
+        <h3>Crowns earned</h3>
+        ${
+          earned.length
+            ? earned
+                .map(
+                  (t) =>
+                    `<div class="trophy-row"><span>${t.emoji} ${esc(t.name)}</span><span>${'👑'.repeat(Math.min(player.techniques[t.id].crowns, 6))}</span></div>`
+                )
+                .join('')
+            : '<p class="muted">No crowns yet — earn one by getting 5 right in a technique. You can do it! 💪</p>'
+        }
+      </div>
+    </div>
+  `);
+  node.querySelector('.back-btn').addEventListener('click', screenDashboard);
+  show(node);
+}
+
+// ---------------------------------------------------------------------------
+// LEADERBOARD — global, nicknames only
+// ---------------------------------------------------------------------------
+function askNickname(onset) {
+  const node = el(`
+    <div class="screen welcome">
+      <div class="logo">🏆</div>
+      <h1 class="app-title">Leaderboard name</h1>
+      <div class="card">
+        <p>Pick a fun name to show on the leaderboard. Your real name stays private. 😊</p>
+        <input id="nick" class="text-input big" maxlength="14" placeholder="e.g. MathsNinja" value="${esc(player.nickname || '')}" />
+        <button id="savenick" class="primary-btn big">Save</button>
+        <button class="back-btn wide" id="cancelnick">← Back</button>
+      </div>
+    </div>
+  `);
+  node.querySelector('#cancelnick').addEventListener('click', screenDashboard);
+  const input = node.querySelector('#nick');
+  node.querySelector('#savenick').addEventListener('click', async () => {
+    const nn = input.value.trim().replace(/[<>]/g, '');
+    if (!nn) return;
+    player.nickname = nn;
+    await persist();
+    onset();
+  });
+  show(node);
+  setTimeout(() => input.focus(), 50);
+}
+
+async function screenLeaderboard() {
+  if (!player.nickname) {
+    askNickname(screenLeaderboard);
+    return;
+  }
+  const node = el(`
+    <div class="screen leaderboard">
+      <button class="back-btn">← Back</button>
+      <h1>🏆 Leaderboard</h1>
+      <p class="muted" id="lb-you">Loading…</p>
+      <div class="card"><div class="lb-list" id="lb-list">Loading…</div></div>
+      <button class="ghost-btn wide" id="editnick">✏️ Change my leaderboard name</button>
+    </div>
+  `);
+  node.querySelector('.back-btn').addEventListener('click', screenDashboard);
+  node.querySelector('#editnick').addEventListener('click', () => askNickname(screenLeaderboard));
+  show(node);
+
+  const data = await getLeaderboard(player.name);
+  const list = node.querySelector('#lb-list');
+  const youLine = node.querySelector('#lb-you');
+  if (!data || !data.top) {
+    list.textContent = 'Could not load the leaderboard (you might be offline).';
+    youLine.textContent = '';
+    return;
+  }
+  youLine.textContent = data.you && data.you.rank ? `You (${data.you.nickname}) are #${data.you.rank} with ${data.you.coins} 🪙` : 'Earn coins to climb the board!';
+  if (!data.top.length) {
+    list.innerHTML = '<p class="muted">No scores yet — be the first! 🪙</p>';
+    return;
+  }
+  const medal = (i) => (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`);
+  list.innerHTML = data.top
+    .map(
+      (r, i) =>
+        `<div class="lb-row ${r.nickname === player.nickname ? 'lb-me' : ''}">
+          <span class="lb-rank">${medal(i)}</span>
+          <span class="lb-name">${esc(r.nickname)}</span>
+          <span class="lb-coins">🪙 ${r.coins} &nbsp; 👑 ${r.crowns}</span>
+        </div>`
+    )
+    .join('');
+}
+
+// ---------------------------------------------------------------------------
+// SPEED TEST — how many can you solve against the clock?
+// ---------------------------------------------------------------------------
+let speed = null;
+
+function screenSpeedSetup() {
+  const techChips = [{ id: 'mixed', name: '🎲 Mixed (all)' }, ...TECHNIQUES.map((t) => ({ id: t.id, name: `${t.emoji} ${t.name}` }))];
+  const node = el(`
+    <div class="screen speed-setup">
+      <button class="back-btn">← Back</button>
+      <h1>⏱️ Speed Test</h1>
+      <p class="muted">Tap the right answer as fast as you can. How many can you get?</p>
+      <div class="card">
+        <h3>How long?</h3>
+        <div class="dur-grid">
+          <button class="dur-btn selected" data-dur="60">60s</button>
+          <button class="dur-btn" data-dur="120">2 min</button>
+          <button class="dur-btn" data-dur="180">3 min</button>
+        </div>
+        <h3>Which trick?</h3>
+        <select id="speed-tech" class="text-input">
+          ${techChips.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}
+        </select>
+        <button id="speed-go" class="primary-btn big">Start ⏱️</button>
+      </div>
+    </div>
+  `);
+  node.querySelector('.back-btn').addEventListener('click', screenDashboard);
+  let dur = 60;
+  node.querySelectorAll('.dur-btn').forEach((b) =>
+    b.addEventListener('click', () => {
+      dur = Number(b.dataset.dur);
+      node.querySelectorAll('.dur-btn').forEach((x) => x.classList.remove('selected'));
+      b.classList.add('selected');
+    })
+  );
+  node.querySelector('#speed-go').addEventListener('click', () => {
+    const techId = node.querySelector('#speed-tech').value;
+    startSpeed(techId, dur);
+  });
+  show(node);
+}
+
+function startSpeed(techId, duration) {
+  speed = { techId, duration, left: duration, score: 0, used: new Set(), lastKey: null, timer: null, q: null };
+  speed.timer = setInterval(() => {
+    speed.left--;
+    const el2 = document.getElementById('speed-timer');
+    if (el2) el2.textContent = speed.left + 's';
+    if (speed.left <= 0) endSpeed();
+  }, 1000);
+  nextSpeedQ();
+}
+
+function pickSpeedTech() {
+  return speed.techId === 'mixed' ? TECHNIQUES[Math.floor(Math.random() * TECHNIQUES.length)].id : speed.techId;
+}
+
+function nextSpeedQ() {
+  speed.q = pickDistinct(() => generate(pickSpeedTech(), { difficulty: 0, level: 0 }), speed.used, speed.lastKey);
+  speed.lastKey = speed.q.text;
+  renderSpeedQ();
+}
+
+function renderSpeedQ() {
+  const q = speed.q;
+  const node = el(`
+    <div class="screen speedquiz">
+      <div class="quiz-stats">
+        <span id="speed-timer" class="speed-timer">${speed.left}s</span>
+        <span>✅ ${speed.score}</span>
+      </div>
+      <div class="card question-card">
+        <div class="question-text">${esc(q.text)}</div>
+        ${q.visual ? `<div class="q-visual">${q.visual}</div>` : ''}
+        <div class="choice-grid"></div>
+      </div>
+      <button class="ghost-btn wide" id="speed-stop">Stop</button>
+    </div>
+  `);
+  node.querySelector('#speed-stop').addEventListener('click', endSpeed);
+  const grid = node.querySelector('.choice-grid');
+  (q.choices || []).forEach((c) => {
+    const b = el(`<button class="choice-btn">${commafy(c)}</button>`);
+    b.addEventListener('click', () => {
+      if (c === q.answer) {
+        speed.score++;
+        player.coins += 1;
+        b.classList.add('is-right');
+        goodSound();
+      } else {
+        b.classList.add('is-wrong');
+        badSound();
+      }
+      setTimeout(nextSpeedQ, 120);
+    });
+    grid.appendChild(b);
+  });
+  show(node);
+}
+
+async function endSpeed() {
+  if (!speed) return;
+  clearInterval(speed.timer);
+  const key = speed.techId;
+  const prev = player.speedBest[key] || 0;
+  const isBest = speed.score > prev;
+  if (isBest) player.speedBest[key] = speed.score;
+  const label = speed.techId === 'mixed' ? 'Mixed' : TECHNIQUE_INDEX[speed.techId].name;
+  await persist();
+  const node = el(`
+    <div class="screen results">
+      <div class="logo">⏱️</div>
+      <h1>Time's up!</h1>
+      <p class="big-score">${speed.score} solved</p>
+      <p class="stars-big">+${speed.score} 🪙</p>
+      <p class="muted">${label} · ${speed.duration}s · best: ${player.speedBest[key]} ${isBest ? '🎉 new best!' : ''}</p>
+      <div class="result-actions">
+        <button class="primary-btn" id="again">⏱️ Play again</button>
+        <button class="ghost-btn wide" id="home">🏠 Home</button>
+      </div>
+    </div>
+  `);
+  node.querySelector('#again').addEventListener('click', () => startSpeed(speed.techId, speed.duration));
+  node.querySelector('#home').addEventListener('click', screenDashboard);
+  if (isBest) confetti();
+  speed = null;
   show(node);
 }
 

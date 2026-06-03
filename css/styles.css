@@ -1058,3 +1058,114 @@ button {
     font-size: 0.98rem;
   }
 }
+
+/* Hub buttons (Trophies / Leaderboard / Speed Test) */
+.hub-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.hub-btn {
+  background: #fff;
+  border-radius: 16px;
+  padding: 12px 6px;
+  font-size: 1.7rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  box-shadow: var(--shadow);
+}
+.hub-btn span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.coin-gain {
+  color: #e8a800;
+  font-size: 0.9rem;
+}
+
+/* Trophies */
+.big-coins {
+  text-align: center;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #e8a800;
+  margin: 8px 0 4px;
+}
+.big-coins span {
+  font-size: 1rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+.trophy-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 4px;
+  border-bottom: 1px solid #f1f3f5;
+  font-weight: 600;
+}
+
+/* Leaderboard */
+.lb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: var(--bg1);
+}
+.lb-row.lb-me {
+  background: #d3f9d8;
+  outline: 2px solid var(--green-d);
+}
+.lb-rank {
+  font-weight: 800;
+  width: 38px;
+  font-size: 1.05rem;
+}
+.lb-name {
+  flex: 1;
+  font-weight: 700;
+}
+.lb-coins {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Speed test */
+.dur-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.dur-btn {
+  background: #fff;
+  border: 3px solid #eee;
+  border-radius: 14px;
+  padding: 14px 6px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  box-shadow: var(--shadow);
+}
+.dur-btn.selected {
+  border-color: var(--pink);
+  background: var(--bg1);
+}
+#speed-tech {
+  margin-bottom: 12px;
+}
+.speed-timer {
+  font-weight: 800;
+  color: var(--pink-d);
+  font-size: 1.2rem;
+}
