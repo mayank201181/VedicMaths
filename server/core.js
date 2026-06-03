@@ -45,8 +45,13 @@ export function handleQuestion(query = {}) {
 // GET /api/player/:name
 export async function handlePlayerGet(name) {
   if (!name) return bad('missing name');
-  const player = await getPlayer(name);
-  return ok({ player: player || null });
+  try {
+    const player = await getPlayer(name);
+    return ok({ player: player || null });
+  } catch (e) {
+    // Storage hiccup — let the client fall back to its local copy instead of erroring.
+    return ok({ player: null, warning: 'storage-unavailable' });
+  }
 }
 
 // POST /api/player/:name  (body = full player object)
@@ -54,11 +59,17 @@ export async function handlePlayerPost(name, body) {
   if (!name) return bad('missing name');
   if (!body || typeof body !== 'object') return bad('missing body');
   const player = ensureShape({ ...body, name });
-  // Owner control wins: a client save can never clear a disabled flag.
-  const existing = await getPlayer(name);
-  if (existing && existing.disabled) player.disabled = true;
-  await setPlayer(name, player);
-  return ok({ player });
+  try {
+    // Owner control wins: a client save can never clear a disabled flag.
+    const existing = await getPlayer(name);
+    if (existing && existing.disabled) player.disabled = true;
+    await setPlayer(name, player);
+    return ok({ player });
+  } catch (e) {
+    // Never fail a child's session over a storage problem — they keep their
+    // local copy; this one sync just didn't happen.
+    return ok({ player, warning: 'not-synced' });
+  }
 }
 
 // GET /api/players  (used by the grown-ups overview if ever served)
@@ -95,19 +106,23 @@ export async function handleOwner(body = {}) {
   if (!ownerAuthed(body.key)) return { status: 401, json: { error: 'unauthorized' } };
 
   const action = body.action || 'list';
-  if (action === 'list') {
-    const players = await listPlayers();
-    players.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-    return ok({ backend, players: players.map(summarise) });
+  try {
+    if (action === 'list') {
+      const players = await listPlayers();
+      players.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+      return ok({ backend, players: players.map(summarise) });
+    }
+    if (action === 'setDisabled') {
+      if (!body.name) return bad('missing name');
+      const existing = await getPlayer(body.name);
+      if (!existing) return bad('no such player');
+      const player = ensureShape(existing);
+      player.disabled = Boolean(body.disabled);
+      await setPlayer(body.name, player);
+      return ok({ player: summarise(player) });
+    }
+    return bad('unknown action');
+  } catch (e) {
+    return { status: 200, json: { backend, players: [], error: 'storage-unavailable' } };
   }
-  if (action === 'setDisabled') {
-    if (!body.name) return bad('missing name');
-    const existing = await getPlayer(body.name);
-    if (!existing) return bad('no such player');
-    const player = ensureShape(existing);
-    player.disabled = Boolean(body.disabled);
-    await setPlayer(body.name, player);
-    return ok({ player: summarise(player) });
-  }
-  return bad('unknown action');
 }
